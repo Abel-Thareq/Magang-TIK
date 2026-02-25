@@ -64,7 +64,7 @@ namespace SiBMN.Models
         public Pengajuan? Pengajuan { get; set; }
 
         [ForeignKey("IdBarang")]
-        public MasterBarang? MasterBarang { get; set; }
+        public KodeBarang? KodeBarang { get; set; }
 
         [ForeignKey("IdRuang")]
         public RuangGedung? RuangGedung { get; set; }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SiBMN.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateV4 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,24 @@ namespace SiBMN.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Kategori_Barang", x => x.id_kategori);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Kode_Barang",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    kode_golongan = table.Column<string>(type: "TEXT", maxLength: 1, nullable: false),
+                    kode_bidang = table.Column<string>(type: "TEXT", maxLength: 2, nullable: false),
+                    kode_kelompok = table.Column<string>(type: "TEXT", maxLength: 2, nullable: false),
+                    kode_sub_kelompok = table.Column<string>(type: "TEXT", maxLength: 2, nullable: false),
+                    kode_barang_value = table.Column<string>(type: "TEXT", maxLength: 3, nullable: false),
+                    uraian_barang = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Kode_Barang", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -261,17 +279,23 @@ namespace SiBMN.Migrations
                     jumlah_disetujui = table.Column<int>(type: "INTEGER", nullable: false),
                     link_survey = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     gambar_ekatalog = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    spesifikasi = table.Column<string>(type: "TEXT", nullable: true)
+                    spesifikasi = table.Column<string>(type: "TEXT", nullable: true),
+                    MasterBarangIdBarang = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Detail_Pengajuan", x => x.id_detPengajuan);
                     table.ForeignKey(
-                        name: "FK_Detail_Pengajuan_Master_Barang_id_barang",
+                        name: "FK_Detail_Pengajuan_Kode_Barang_id_barang",
                         column: x => x.id_barang,
-                        principalTable: "Master_Barang",
-                        principalColumn: "id_barang",
+                        principalTable: "Kode_Barang",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Detail_Pengajuan_Master_Barang_MasterBarangIdBarang",
+                        column: x => x.MasterBarangIdBarang,
+                        principalTable: "Master_Barang",
+                        principalColumn: "id_barang");
                     table.ForeignKey(
                         name: "FK_Detail_Pengajuan_Pengajuan_id_pengajuan",
                         column: x => x.id_pengajuan,
@@ -318,13 +342,101 @@ namespace SiBMN.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Kode_Barang",
+                columns: new[] { "id", "kode_barang_value", "kode_bidang", "kode_golongan", "kode_kelompok", "kode_sub_kelompok", "uraian_barang" },
+                values: new object[,]
+                {
+                    { 1, "000", "00", "1", "00", "00", "Barang Kuasi" },
+                    { 2, "000", "00", "2", "00", "00", "Tanah" },
+                    { 3, "000", "00", "3", "00", "00", "Peralatan dan Mesin" },
+                    { 4, "000", "00", "4", "00", "00", "Gedung dan Bangunan" },
+                    { 5, "000", "00", "5", "00", "00", "Jalan, Irigasi dan Jaringan" },
+                    { 6, "000", "00", "6", "00", "00", "Aset Tetap Lainnya" },
+                    { 10, "000", "01", "3", "00", "00", "Alat Besar" },
+                    { 11, "000", "02", "3", "00", "00", "Alat Angkutan" },
+                    { 12, "000", "03", "3", "00", "00", "Alat Bengkel dan Alat Ukur" },
+                    { 13, "000", "04", "3", "00", "00", "Alat Pertanian" },
+                    { 14, "000", "05", "3", "00", "00", "Alat Kantor dan Rumah Tangga" },
+                    { 15, "000", "06", "3", "00", "00", "Alat Studio, Komunikasi dan Pemancar" },
+                    { 16, "000", "07", "3", "00", "00", "Alat Kedokteran dan Kesehatan" },
+                    { 17, "000", "08", "3", "00", "00", "Alat Laboratorium" },
+                    { 18, "000", "09", "3", "00", "00", "Komputer" },
+                    { 19, "000", "01", "4", "00", "00", "Bangunan Gedung" },
+                    { 20, "000", "02", "4", "00", "00", "Monumen" },
+                    { 21, "000", "05", "3", "01", "00", "Alat Kantor" },
+                    { 22, "000", "05", "3", "02", "00", "Alat Rumah Tangga" },
+                    { 23, "000", "05", "3", "03", "00", "Peralatan Komputer" },
+                    { 24, "000", "09", "3", "01", "00", "Komputer Unit" },
+                    { 25, "000", "09", "3", "02", "00", "Peralatan Komputer" },
+                    { 26, "000", "09", "3", "03", "00", "Peralatan Jaringan" },
+                    { 27, "000", "01", "3", "01", "00", "Alat Besar Darat" },
+                    { 28, "000", "01", "3", "02", "00", "Alat Besar Apung" },
+                    { 30, "000", "05", "3", "01", "01", "Mesin Ketik" },
+                    { 31, "000", "05", "3", "01", "02", "Mesin Hitung/Jumlah" },
+                    { 32, "000", "05", "3", "01", "03", "Alat Penyimpanan Perlengkapan Kantor" },
+                    { 33, "000", "05", "3", "01", "04", "Alat Kantor Lainnya" },
+                    { 34, "000", "05", "3", "02", "01", "Meubelair" },
+                    { 35, "000", "05", "3", "02", "02", "Alat Pendingin" },
+                    { 36, "000", "05", "3", "02", "03", "Alat Dapur" },
+                    { 37, "000", "05", "3", "02", "04", "Alat Pembersih" },
+                    { 38, "000", "09", "3", "01", "01", "Komputer/PC" },
+                    { 39, "000", "09", "3", "01", "02", "Laptop/Notebook" },
+                    { 40, "000", "09", "3", "01", "03", "Server" },
+                    { 41, "000", "09", "3", "02", "01", "Peralatan Mainframe" },
+                    { 42, "000", "09", "3", "02", "02", "Peralatan Mini Komputer" },
+                    { 43, "000", "09", "3", "02", "03", "Peralatan Personal Komputer" },
+                    { 50, "001", "05", "3", "01", "03", "Lemari Besi/Metal" },
+                    { 51, "002", "05", "3", "01", "03", "Lemari Kayu" },
+                    { 52, "003", "05", "3", "01", "03", "Rak Besi/Metal" },
+                    { 53, "004", "05", "3", "01", "03", "Rak Kayu" },
+                    { 54, "005", "05", "3", "01", "03", "Filing Cabinet Besi" },
+                    { 55, "006", "05", "3", "01", "03", "Brand Kas" },
+                    { 56, "001", "05", "3", "02", "01", "Meja Kerja" },
+                    { 57, "002", "05", "3", "02", "01", "Meja Rapat" },
+                    { 58, "003", "05", "3", "02", "01", "Kursi Kerja" },
+                    { 59, "004", "05", "3", "02", "01", "Kursi Tamu" },
+                    { 60, "005", "05", "3", "02", "01", "Tempat Tidur" },
+                    { 61, "006", "05", "3", "02", "01", "Sofa" },
+                    { 62, "001", "05", "3", "02", "02", "AC Split" },
+                    { 63, "002", "05", "3", "02", "02", "AC Window" },
+                    { 64, "003", "05", "3", "02", "02", "Kipas Angin" },
+                    { 65, "004", "05", "3", "02", "02", "Exhaust Fan" },
+                    { 66, "001", "09", "3", "01", "01", "PC Desktop" },
+                    { 67, "002", "09", "3", "01", "01", "PC All-in-One" },
+                    { 68, "003", "09", "3", "01", "01", "PC Mini/NUC" },
+                    { 69, "001", "09", "3", "01", "02", "Laptop 14 inch" },
+                    { 70, "002", "09", "3", "01", "02", "Laptop 15 inch" },
+                    { 71, "003", "09", "3", "01", "02", "Notebook Ultrabook" },
+                    { 72, "001", "09", "3", "02", "03", "Printer Laser" },
+                    { 73, "002", "09", "3", "02", "03", "Printer Inkjet" },
+                    { 74, "003", "09", "3", "02", "03", "Scanner" },
+                    { 75, "004", "09", "3", "02", "03", "Monitor LED" },
+                    { 76, "005", "09", "3", "02", "03", "Proyektor LCD" },
+                    { 77, "006", "09", "3", "02", "03", "UPS" },
+                    { 78, "007", "09", "3", "02", "03", "Keyboard" },
+                    { 79, "008", "09", "3", "02", "03", "Mouse" },
+                    { 80, "000", "09", "3", "03", "01", "Peralatan Jaringan LAN" },
+                    { 81, "001", "09", "3", "03", "01", "Router WiFi" },
+                    { 82, "002", "09", "3", "03", "01", "Switch Managed" },
+                    { 83, "003", "09", "3", "03", "01", "Access Point" },
+                    { 84, "004", "09", "3", "03", "01", "CCTV IP Camera" },
+                    { 85, "001", "09", "3", "01", "03", "Server Tower" },
+                    { 86, "002", "09", "3", "01", "03", "Server Rack" },
+                    { 87, "003", "09", "3", "01", "03", "Server Blade" },
+                    { 88, "000", "01", "3", "01", "01", "Traktor" },
+                    { 89, "001", "01", "3", "01", "01", "Traktor Roda Dua" },
+                    { 90, "002", "01", "3", "01", "01", "Traktor Roda Empat" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "id_role", "nama_role" },
                 values: new object[,]
                 {
                     { 1, "Admin Unit Kerja" },
                     { 2, "Tim Pengadaan" },
-                    { 3, "Admin Pusat" }
+                    { 3, "Admin Pusat" },
+                    { 4, "Tim Kerja BMN" }
                 });
 
             migrationBuilder.InsertData(
@@ -387,7 +499,8 @@ namespace SiBMN.Migrations
                     { 2, "admin.ekonomi@univ.ac.id", "Admin Ekonomi", "admin123", 1, 2 },
                     { 3, "pengadaan@univ.ac.id", "Tim Pengadaan", "admin123", 2, 4 },
                     { 4, "budi@univ.ac.id", "Prof. Dr. Budi Santoso", "admin123", 3, 4 },
-                    { 5, "siti@univ.ac.id", "Dr. Siti Rahayu, M.Sc.", "admin123", 3, 4 }
+                    { 5, "siti@univ.ac.id", "Dr. Siti Rahayu, M.Sc.", "admin123", 3, 4 },
+                    { 6, "bmn@univ.ac.id", "Tim BMN", "admin123", 4, 4 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -414,6 +527,17 @@ namespace SiBMN.Migrations
                 name: "IX_Detail_Pengajuan_id_ruang",
                 table: "Detail_Pengajuan",
                 column: "id_ruang");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Detail_Pengajuan_MasterBarangIdBarang",
+                table: "Detail_Pengajuan",
+                column: "MasterBarangIdBarang");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Kode_Barang_kode_golongan_kode_bidang_kode_kelompok_kode_sub_kelompok_kode_barang_value",
+                table: "Kode_Barang",
+                columns: new[] { "kode_golongan", "kode_bidang", "kode_kelompok", "kode_sub_kelompok", "kode_barang_value" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Master_Barang_id_kategori",
@@ -485,6 +609,9 @@ namespace SiBMN.Migrations
 
             migrationBuilder.DropTable(
                 name: "Stok_Persediaan");
+
+            migrationBuilder.DropTable(
+                name: "Kode_Barang");
 
             migrationBuilder.DropTable(
                 name: "Aset_Inventaris");

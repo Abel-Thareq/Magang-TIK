@@ -133,13 +133,14 @@
                                     <span class="badge bg-secondary">@item.NoPrioritas</span>
                                 </td>
                                 <td>
-                                    <strong>@item.MasterBarang?.NamaBarang</strong>
+                                    <strong>@item.KodeBarang?.UraianBarang</strong>
+                                    <br /><small class="text-muted">@item.KodeBarang?.KodeBarangLengkap</small>
                                 </td>
                                 <td style="max-width:200px; font-size:0.82rem; color:var(--text-secondary);">
-                                    @(item.Spesifikasi ?? item.MasterBarang?.Spesifikasi ?? "-")
+                                    @(item.Spesifikasi ?? "-")
                                 </td>
                                 <td>@item.JumlahDiminta</td>
-                                <td>@item.MasterBarang?.Satuan</td>
+                                <td>Unit</td>
                                 <td class="currency">Rp @item.HargaSatuan.ToString("N0")</td>
                                 <td class="currency" style="color:var(--primary); font-weight:700;">
                                     Rp @item.JumlahHarga.ToString("N0")

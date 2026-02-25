@@ -20,6 +20,35 @@
             </div>
 
             <div class="row g-3">
+                <!-- Cascading Filter for Barang -->
+                <div class="col-12">
+                    <label class="form-label" style="font-weight:600; color:var(--text-secondary); font-size:0.85rem;">
+                        <i class="fas fa-filter me-1"></i>Filter Kode Barang (opsional)
+                    </label>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="filterGolongan">
+                                <option value="">-- Semua Golongan --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="filterBidang">
+                                <option value="">-- Semua Bidang --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="filterKelompok">
+                                <option value="">-- Semua Kelompok --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="filterSubKelompok">
+                                <option value="">-- Semua Sub Kel. --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-8">
                     <label asp-for="IdBarang" class="form-label">
                         Nama Barang <span class="required-star">*</span>
@@ -28,6 +57,7 @@
                         <option value="">-- Cari & Pilih Barang --</option>
                     </select>
                     <span asp-validation-for="IdBarang" class="text-danger" style="font-size:0.8rem;"></span>
+                    <div class="form-text" id="barangCount">Menampilkan semua barang</div>
                 </div>
 
                 <div class="col-md-4">
@@ -201,18 +231,124 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Map barang ke satuan
-        var satuanMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BarangSatuanMap as Dictionary<int, string>));
+        // Store all barang options for client-side filtering
+        var allBarangOptions = [];
+        var barangSelect = document.getElementById('barangSelect');
 
-        document.getElementById('barangSelect').addEventListener('change', function() {
-            var barangId = parseInt(this.value);
-            var satuanField = document.getElementById('satuanDisplay');
-            if (satuanMap[barangId]) {
-                satuanField.value = satuanMap[barangId];
-            } else {
-                satuanField.value = '';
+        // Save all options on load
+        document.addEventListener('DOMContentLoaded', function () {
+            for (var i = 0; i < barangSelect.options.length; i++) {
+                allBarangOptions.push({
+                    value: barangSelect.options[i].value,
+                    text: barangSelect.options[i].text
+                });
             }
+            updateBarangCount();
+
+            // Load Golongan filter dropdown
+            fetch('/api/KodeBarangApi/Golongan')
+                .then(r => r.json())
+                .then(data => {
+                    var sel = document.getElementById('filterGolongan');
+                    data.forEach(item => {
+                        sel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode));
+                    });
+                });
+
+            // Cascading: Golongan → Bidang
+            document.getElementById('filterGolongan').addEventListener('change', function () {
+                var val = this.value;
+                var bidangSel = document.getElementById('filterBidang');
+                var kelompokSel = document.getElementById('filterKelompok');
+                var subkelSel = document.getElementById('filterSubKelompok');
+                bidangSel.innerHTML = '<option value="">-- Semua Bidang --</option>';
+                kelompokSel.innerHTML = '<option value="">-- Semua Kelompok --</option>';
+                subkelSel.innerHTML = '<option value="">-- Semua Sub Kel. --</option>';
+                filterBarangDropdown();
+                if (!val) return;
+                fetch(`/api/KodeBarangApi/Bidang?kodeGolongan=${val}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        data.forEach(item => { bidangSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    });
+            });
+
+            // Cascading: Bidang → Kelompok
+            document.getElementById('filterBidang').addEventListener('change', function () {
+                var golVal = document.getElementById('filterGolongan').value;
+                var val = this.value;
+                var kelompokSel = document.getElementById('filterKelompok');
+                var subkelSel = document.getElementById('filterSubKelompok');
+                kelompokSel.innerHTML = '<option value="">-- Semua Kelompok --</option>';
+                subkelSel.innerHTML = '<option value="">-- Semua Sub Kel. --</option>';
+                filterBarangDropdown();
+                if (!golVal || !val) return;
+                fetch(`/api/KodeBarangApi/Kelompok?kodeGolongan=${golVal}&kodeBidang=${val}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        data.forEach(item => { kelompokSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    });
+            });
+
+            // Cascading: Kelompok → Sub Kelompok
+            document.getElementById('filterKelompok').addEventListener('change', function () {
+                var golVal = document.getElementById('filterGolongan').value;
+                var bidangVal = document.getElementById('filterBidang').value;
+                var val = this.value;
+                var subkelSel = document.getElementById('filterSubKelompok');
+                subkelSel.innerHTML = '<option value="">-- Semua Sub Kel. --</option>';
+                filterBarangDropdown();
+                if (!golVal || !bidangVal || !val) return;
+                fetch(`/api/KodeBarangApi/SubKelompok?kodeGolongan=${golVal}&kodeBidang=${bidangVal}&kodeKelompok=${val}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        data.forEach(item => { subkelSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    });
+            });
+
+            // Sub Kelompok change → filter
+            document.getElementById('filterSubKelompok').addEventListener('change', function () {
+                filterBarangDropdown();
+            });
         });
+
+        function filterBarangDropdown() {
+            var golVal = document.getElementById('filterGolongan').value;
+            var bidangVal = document.getElementById('filterBidang').value;
+            var kelompokVal = document.getElementById('filterKelompok').value;
+            var subkelVal = document.getElementById('filterSubKelompok').value;
+
+            barangSelect.innerHTML = '<option value="">-- Cari & Pilih Barang --</option>';
+            var count = 0;
+
+            allBarangOptions.forEach(function (opt) {
+                if (!opt.value) return; // skip placeholder
+                var text = opt.text; // format: "3.05.01.03.001 - Lemari Besi/Metal"
+                var parts = text.split(' - ')[0].split('.');
+
+                if (golVal && parts[0] !== golVal) return;
+                if (bidangVal && parts[1] !== bidangVal) return;
+                if (kelompokVal && parts[2] !== kelompokVal) return;
+                if (subkelVal && parts[3] !== subkelVal) return;
+
+                var option = new Option(opt.text, opt.value);
+                barangSelect.add(option);
+                count++;
+            });
+
+            updateBarangCount(count);
+        }
+
+        function updateBarangCount(count) {
+            var el = document.getElementById('barangCount');
+            if (count === undefined) {
+                count = allBarangOptions.filter(o => o.value).length;
+                el.textContent = `Menampilkan semua ${count} barang`;
+            } else {
+                var total = allBarangOptions.filter(o => o.value).length;
+                el.textContent = `Menampilkan ${count} dari ${total} barang`;
+            }
+        }
 
         // Init
         handleAsalBarang();

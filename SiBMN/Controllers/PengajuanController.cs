@@ -156,7 +156,7 @@ namespace SiBMN.Controllers
             if (pengajuan == null) return NotFound();
 
             var details = await _context.DetailPengajuans
-                .Include(d => d.MasterBarang)
+                .Include(d => d.KodeBarang)
                 .Include(d => d.RuangGedung)
                 .Where(d => d.IdPengajuan == id)
                 .OrderBy(d => d.NoPrioritas)

@@ -1,0 +1,219 @@
+@model List<SiBMN.Models.KodeBarang>
+@{
+    ViewData["Title"] = "Daftar Barang Modal";
+    var filterGolongan = ViewBag.FilterGolongan as string;
+    var filterBidang = ViewBag.FilterBidang as string;
+    var filterKelompok = ViewBag.FilterKelompok as string;
+    var filterSubKelompok = ViewBag.FilterSubKelompok as string;
+    var hasFilter = !string.IsNullOrEmpty(filterGolongan) || !string.IsNullOrEmpty(filterBidang) || !string.IsNullOrEmpty(filterKelompok) || !string.IsNullOrEmpty(filterSubKelompok);
+}
+
+<div class="fade-in">
+    <div class="mb-4">
+        <h2 style="font-size:1.5rem; font-weight:700; color:var(--text-primary);">
+            <i class="fas fa-boxes-stacked me-2" style="color:var(--accent);"></i>Daftar Barang Modal
+        </h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem;">
+            Pilih barang modal berdasarkan kode barang. Gunakan filter untuk mempersempit pencarian.
+        </p>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-filter me-2" style="color:var(--accent);"></i>Filter Barang
+            @if (hasFilter)
+            {
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary float-end">
+                    <i class="fas fa-times me-1"></i>Reset Filter
+                </a>
+            }
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" id="filterForm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Golongan</label>
+                        <select name="filterGolongan" class="form-select" id="filterGolonganSelect">
+                            <option value="">-- Semua Golongan --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Bidang</label>
+                        <select name="filterBidang" class="form-select" id="filterBidangSelect">
+                            <option value="">-- Semua Bidang --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Kelompok</label>
+                        <select name="filterKelompok" class="form-select" id="filterKelompokSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Sub Kelompok</label>
+                        <select name="filterSubKelompok" class="form-select" id="filterSubKelompokSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Cari
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-table me-2" style="color:var(--accent);"></i>Daftar Barang Modal</span>
+            <span class="badge bg-primary">@Model.Count barang</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tableBarangModal">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Kode Barang</th>
+                            <th>Uraian Barang</th>
+                            <th>Golongan</th>
+                            <th>Bidang</th>
+                            <th>Kelompok</th>
+                            <th>Sub Kelompok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    @if (hasFilter)
+                                    {
+                                        <span>Tidak ada barang yang sesuai filter. <a href="@Url.Action("Index")">Tampilkan semua</a></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Belum ada data barang modal. Data diisi oleh Tim Kerja BMN.</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var item = Model[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><strong style="color:var(--accent);">@item.KodeBarangLengkap</strong></td>
+                                <td>@item.UraianBarang</td>
+                                <td><span class="badge bg-danger" style="font-size:0.75rem;">@item.KodeGolongan</span></td>
+                                <td>@item.KodeBidang</td>
+                                <td>@item.KodeKelompok</td>
+                                <td>@item.KodeSubKelompok</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    #tableBarangModal th {
+        background: var(--bg-tertiary, #f8f9fa);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem;
+        border-bottom: 2px solid var(--border, #dee2e6);
+    }
+    #tableBarangModal td {
+        vertical-align: middle;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    #tableBarangModal tbody tr:hover {
+        background: rgba(99, 102, 241, 0.04);
+    }
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+    }
+</style>
+
+<script>
+    var savedFilterGolongan = '@(filterGolongan ?? "")';
+    var savedFilterBidang = '@(filterBidang ?? "")';
+    var savedFilterKelompok = '@(filterKelompok ?? "")';
+    var savedFilterSubKelompok = '@(filterSubKelompok ?? "")';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadFilterGolongan();
+
+        document.getElementById('filterGolonganSelect').addEventListener('change', function () {
+            var val = this.value;
+            var bidangSel = document.getElementById('filterBidangSelect');
+            var kelompokSel = document.getElementById('filterKelompokSelect');
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            bidangSel.innerHTML = '<option value="">-- Semua Bidang --</option>';
+            kelompokSel.innerHTML = '<option value="">-- Semua --</option>';
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!val) return;
+            fetch(`/api/KodeBarangApi/Bidang?kodeGolongan=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => { bidangSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    if (savedFilterBidang) { bidangSel.value = savedFilterBidang; bidangSel.dispatchEvent(new Event('change')); savedFilterBidang = ''; }
+                });
+        });
+
+        document.getElementById('filterBidangSelect').addEventListener('change', function () {
+            var golVal = document.getElementById('filterGolonganSelect').value;
+            var val = this.value;
+            var kelompokSel = document.getElementById('filterKelompokSelect');
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            kelompokSel.innerHTML = '<option value="">-- Semua --</option>';
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!golVal || !val) return;
+            fetch(`/api/KodeBarangApi/Kelompok?kodeGolongan=${golVal}&kodeBidang=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => { kelompokSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    if (savedFilterKelompok) { kelompokSel.value = savedFilterKelompok; kelompokSel.dispatchEvent(new Event('change')); savedFilterKelompok = ''; }
+                });
+        });
+
+        document.getElementById('filterKelompokSelect').addEventListener('change', function () {
+            var golVal = document.getElementById('filterGolonganSelect').value;
+            var bidangVal = document.getElementById('filterBidangSelect').value;
+            var val = this.value;
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!golVal || !bidangVal || !val) return;
+            fetch(`/api/KodeBarangApi/SubKelompok?kodeGolongan=${golVal}&kodeBidang=${bidangVal}&kodeKelompok=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => { subkelSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                    if (savedFilterSubKelompok) { subkelSel.value = savedFilterSubKelompok; savedFilterSubKelompok = ''; }
+                });
+        });
+    });
+
+    function loadFilterGolongan() {
+        fetch('/api/KodeBarangApi/Golongan')
+            .then(r => r.json())
+            .then(data => {
+                var sel = document.getElementById('filterGolonganSelect');
+                data.forEach(item => { sel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode)); });
+                if (savedFilterGolongan) { sel.value = savedFilterGolongan; sel.dispatchEvent(new Event('change')); savedFilterGolongan = ''; }
+            });
+    }
+</script>
+}

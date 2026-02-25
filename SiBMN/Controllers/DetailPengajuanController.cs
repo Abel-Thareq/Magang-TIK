@@ -257,14 +257,21 @@ namespace SiBMN.Controllers
 
         private async Task PopulateDropdowns(int unitId)
         {
-            var barangs = await _context.MasterBarangs
-                .Include(b => b.KategoriBarang)
-                .OrderBy(b => b.NamaBarang)
-                .Select(b => new { b.IdBarang, Display = b.NamaBarang + " (" + b.KategoriBarang!.NamaKategori + ")", b.Satuan })
+            // Use KodeBarang (leaf-level items only) instead of MasterBarang
+            var kodeBarangs = await _context.KodeBarangs
+                .Where(k => k.KodeBarangValue != "000") // Only leaf-level items
+                .OrderBy(k => k.KodeGolongan)
+                .ThenBy(k => k.KodeBidang)
+                .ThenBy(k => k.KodeKelompok)
+                .ThenBy(k => k.KodeSubKelompok)
+                .ThenBy(k => k.KodeBarangValue)
+                .Select(k => new { 
+                    k.Id, 
+                    Display = k.KodeGolongan + "." + k.KodeBidang + "." + k.KodeKelompok + "." + k.KodeSubKelompok + "." + k.KodeBarangValue + " - " + k.UraianBarang 
+                })
                 .ToListAsync();
 
-            ViewBag.Barangs = new SelectList(barangs, "IdBarang", "Display");
-            ViewBag.BarangSatuanMap = barangs.ToDictionary(b => b.IdBarang, b => b.Satuan);
+            ViewBag.Barangs = new SelectList(kodeBarangs, "Id", "Display");
 
             // Get gedung list (distinct)
             var gedungs = await _context.RuangGedungs

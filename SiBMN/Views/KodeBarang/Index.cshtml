@@ -1,0 +1,609 @@
+@model List<SiBMN.Models.KodeBarang>
+@{
+    ViewData["Title"] = "Data Master Kode Barang";
+    var filterGolongan = ViewBag.FilterGolongan as string;
+    var filterBidang = ViewBag.FilterBidang as string;
+    var filterKelompok = ViewBag.FilterKelompok as string;
+    var filterSubKelompok = ViewBag.FilterSubKelompok as string;
+    var filterLevel = ViewBag.FilterLevel as string;
+    var hasFilter = !string.IsNullOrEmpty(filterGolongan) || !string.IsNullOrEmpty(filterBidang) || !string.IsNullOrEmpty(filterKelompok) || !string.IsNullOrEmpty(filterSubKelompok) || !string.IsNullOrEmpty(filterLevel);
+}
+
+<div class="fade-in">
+    <div class="mb-4">
+        <h2 style="font-size:1.5rem; font-weight:700; color:var(--text-primary);">
+            <i class="fas fa-barcode me-2" style="color:var(--accent);"></i>Data Master Kode Barang
+        </h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem;">
+            Kelola hierarki kode barang: Golongan → Bidang → Kelompok → Sub Kelompok → Kode Barang
+        </p>
+    </div>
+
+    <!-- Tab Navigation for Input Forms -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus-circle me-2" style="color:var(--accent);"></i>Tambah Kode Barang
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="kodeBarangTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-golongan" data-bs-toggle="tab" data-bs-target="#form-golongan" type="button" role="tab">Golongan</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-bidang" data-bs-toggle="tab" data-bs-target="#form-bidang" type="button" role="tab">Bidang</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-kelompok" data-bs-toggle="tab" data-bs-target="#form-kelompok" type="button" role="tab">Kelompok</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-subkelompok" data-bs-toggle="tab" data-bs-target="#form-subkelompok" type="button" role="tab">Sub Kelompok</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-kodebarang" data-bs-toggle="tab" data-bs-target="#form-kodebarang" type="button" role="tab">Kode Barang</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="kodeBarangTabContent">
+                <!-- Tab Golongan -->
+                <div class="tab-pane fade show active" id="form-golongan" role="tabpanel">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Level" value="Golongan" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Kode Golongan <span class="text-danger">*</span></label>
+                                <input type="text" name="KodeGolongan" class="form-control" maxlength="1" pattern="\d{1}" placeholder="1 digit" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                                <input type="text" name="UraianBarang" class="form-control" placeholder="Masukkan uraian barang" required />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Bidang -->
+                <div class="tab-pane fade" id="form-bidang" role="tabpanel">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Level" value="Bidang" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Kode Golongan <span class="text-danger">*</span></label>
+                                <select name="KodeGolongan" class="form-select dropdown-golongan" required>
+                                    <option value="">-- Pilih Golongan --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Kode Bidang <span class="text-danger">*</span></label>
+                                <input type="text" name="KodeBidang" class="form-control" maxlength="2" pattern="\d{2}" placeholder="2 digit" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                                <input type="text" name="UraianBarang" class="form-control" placeholder="Masukkan uraian barang" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Kelompok -->
+                <div class="tab-pane fade" id="form-kelompok" role="tabpanel">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Level" value="Kelompok" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Golongan <span class="text-danger">*</span></label>
+                                <select name="KodeGolongan" class="form-select dropdown-golongan" data-cascade="bidang" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Bidang <span class="text-danger">*</span></label>
+                                <select name="KodeBidang" class="form-select dropdown-bidang" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Kode Kelompok <span class="text-danger">*</span></label>
+                                <input type="text" name="KodeKelompok" class="form-control" maxlength="2" pattern="\d{2}" placeholder="2 digit" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                                <input type="text" name="UraianBarang" class="form-control" placeholder="Masukkan uraian" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Sub Kelompok -->
+                <div class="tab-pane fade" id="form-subkelompok" role="tabpanel">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Level" value="SubKelompok" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Golongan <span class="text-danger">*</span></label>
+                                <select name="KodeGolongan" class="form-select dropdown-golongan" data-cascade="bidang" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Bidang <span class="text-danger">*</span></label>
+                                <select name="KodeBidang" class="form-select dropdown-bidang" data-cascade="kelompok" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Kelompok <span class="text-danger">*</span></label>
+                                <select name="KodeKelompok" class="form-select dropdown-kelompok" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold">Sub Kel. <span class="text-danger">*</span></label>
+                                <input type="text" name="KodeSubKelompok" class="form-control" maxlength="2" pattern="\d{2}" placeholder="2 digit" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                                <input type="text" name="UraianBarang" class="form-control" placeholder="Masukkan uraian" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Kode Barang -->
+                <div class="tab-pane fade" id="form-kodebarang" role="tabpanel">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Level" value="KodeBarang" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Golongan <span class="text-danger">*</span></label>
+                                <select name="KodeGolongan" class="form-select dropdown-golongan" data-cascade="bidang" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Bidang <span class="text-danger">*</span></label>
+                                <select name="KodeBidang" class="form-select dropdown-bidang" data-cascade="kelompok" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold">Kelompok <span class="text-danger">*</span></label>
+                                <select name="KodeKelompok" class="form-select dropdown-kelompok" data-cascade="subkelompok" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold">Sub Kel. <span class="text-danger">*</span></label>
+                                <select name="KodeSubKelompok" class="form-select dropdown-subkelompok" required>
+                                    <option value="">-- Pilih --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold">Kode <span class="text-danger">*</span></label>
+                                <input type="text" name="KodeBarangValue" class="form-control" maxlength="3" pattern="\d{3}" placeholder="3 digit" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                                <input type="text" name="UraianBarang" class="form-control" placeholder="Masukkan uraian" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-filter me-2" style="color:var(--accent);"></i>Filter Data
+            @if (hasFilter)
+            {
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary float-end">
+                    <i class="fas fa-times me-1"></i>Reset Filter
+                </a>
+            }
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" id="filterForm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Golongan</label>
+                        <select name="filterGolongan" class="form-select" id="filterGolonganSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Bidang</label>
+                        <select name="filterBidang" class="form-select" id="filterBidangSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Kelompok</label>
+                        <select name="filterKelompok" class="form-select" id="filterKelompokSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Sub Kelompok</label>
+                        <select name="filterSubKelompok" class="form-select" id="filterSubKelompokSelect">
+                            <option value="">-- Semua --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Level</label>
+                        <select name="filterLevel" class="form-select" id="filterLevelSelect">
+                            <option value="">-- Semua --</option>
+                            @{ var levels = new[] { ("Golongan", "Golongan"), ("Bidang", "Bidang"), ("Kelompok", "Kelompok"), ("SubKelompok", "Sub Kelompok"), ("KodeBarang", "Kode Barang") }; }
+                            @foreach (var (val, label) in levels)
+                            {
+                                if (filterLevel == val)
+                                {
+                                    <option value="@val" selected="selected">@label</option>
+                                }
+                                else
+                                {
+                                    <option value="@val">@label</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-table me-2" style="color:var(--accent);"></i>Daftar Kode Barang</span>
+            <span class="badge bg-primary">@Model.Count data</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tableKodeBarang">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Kode Lengkap</th>
+                            <th>Gol.</th>
+                            <th>Bidang</th>
+                            <th>Kelompok</th>
+                            <th>Sub Kel.</th>
+                            <th>Kode Brg.</th>
+                            <th>Uraian Barang</th>
+                            <th>Level</th>
+                            <th style="width:120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    @if (hasFilter)
+                                    {
+                                        <span>Tidak ada data yang sesuai dengan filter. <a href="@Url.Action("Index")">Reset filter</a></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Belum ada data kode barang. Silakan tambah data baru.</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var item = Model[i];
+                            var levelColor = item.Level switch
+                            {
+                                "Golongan" => "bg-danger",
+                                "Bidang" => "bg-warning text-dark",
+                                "Kelompok" => "bg-info text-dark",
+                                "Sub Kelompok" => "bg-success",
+                                _ => "bg-primary"
+                            };
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><strong>@item.KodeBarangLengkap</strong></td>
+                                <td>@item.KodeGolongan</td>
+                                <td>@item.KodeBidang</td>
+                                <td>@item.KodeKelompok</td>
+                                <td>@item.KodeSubKelompok</td>
+                                <td>@item.KodeBarangValue</td>
+                                <td>@item.UraianBarang</td>
+                                <td><span class="badge @levelColor" style="font-size:0.75rem;">@item.Level</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning me-1" title="Edit" onclick="showEditModal(@item.Id, '@item.KodeBarangLengkap', '@item.UraianBarang.Replace("'", "\\'")' )">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form asp-action="Delete" method="post" style="display:inline;" onsubmit="return confirm('Yakin hapus kode @item.KodeBarangLengkap?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editId" />
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Kode Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Kode Barang</label>
+                        <input type="text" class="form-control" id="editKode" readonly style="background:#f0f0f0;" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Uraian Barang <span class="text-danger">*</span></label>
+                        <input type="text" name="uraianBarang" class="form-control" id="editUraian" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    .nav-tabs .nav-link {
+        color: var(--text-secondary);
+        font-weight: 500;
+        border: none;
+        border-bottom: 2px solid transparent;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.2s ease;
+    }
+    .nav-tabs .nav-link:hover {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        background: transparent;
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        background: transparent;
+        font-weight: 600;
+    }
+    #tableKodeBarang th {
+        background: var(--bg-tertiary, #f8f9fa);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem;
+        border-bottom: 2px solid var(--border, #dee2e6);
+    }
+    #tableKodeBarang td {
+        vertical-align: middle;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    #tableKodeBarang tbody tr:hover {
+        background: rgba(99, 102, 241, 0.04);
+    }
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+    }
+</style>
+
+<script>
+    var savedFilterGolongan = '@(filterGolongan ?? "")';
+    var savedFilterBidang = '@(filterBidang ?? "")';
+    var savedFilterKelompok = '@(filterKelompok ?? "")';
+    var savedFilterSubKelompok = '@(filterSubKelompok ?? "")';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadGolonganDropdowns();
+        loadFilterGolongan();
+
+        document.getElementById('kodeBarangTabs').addEventListener('shown.bs.tab', function () {
+            loadGolonganDropdowns();
+        });
+
+        // Filter cascading
+        document.getElementById('filterGolonganSelect').addEventListener('change', function () {
+            var val = this.value;
+            var bidangSel = document.getElementById('filterBidangSelect');
+            var kelompokSel = document.getElementById('filterKelompokSelect');
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            bidangSel.innerHTML = '<option value="">-- Semua --</option>';
+            kelompokSel.innerHTML = '<option value="">-- Semua --</option>';
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!val) return;
+            fetch(`/api/KodeBarangApi/Bidang?kodeGolongan=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => {
+                        var opt = new Option(`${item.kode} - ${item.uraian}`, item.kode);
+                        bidangSel.add(opt);
+                    });
+                    if (savedFilterBidang) { bidangSel.value = savedFilterBidang; bidangSel.dispatchEvent(new Event('change')); savedFilterBidang = ''; }
+                });
+        });
+
+        document.getElementById('filterBidangSelect').addEventListener('change', function () {
+            var golVal = document.getElementById('filterGolonganSelect').value;
+            var val = this.value;
+            var kelompokSel = document.getElementById('filterKelompokSelect');
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            kelompokSel.innerHTML = '<option value="">-- Semua --</option>';
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!golVal || !val) return;
+            fetch(`/api/KodeBarangApi/Kelompok?kodeGolongan=${golVal}&kodeBidang=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => {
+                        kelompokSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode));
+                    });
+                    if (savedFilterKelompok) { kelompokSel.value = savedFilterKelompok; kelompokSel.dispatchEvent(new Event('change')); savedFilterKelompok = ''; }
+                });
+        });
+
+        document.getElementById('filterKelompokSelect').addEventListener('change', function () {
+            var golVal = document.getElementById('filterGolonganSelect').value;
+            var bidangVal = document.getElementById('filterBidangSelect').value;
+            var val = this.value;
+            var subkelSel = document.getElementById('filterSubKelompokSelect');
+            subkelSel.innerHTML = '<option value="">-- Semua --</option>';
+            if (!golVal || !bidangVal || !val) return;
+            fetch(`/api/KodeBarangApi/SubKelompok?kodeGolongan=${golVal}&kodeBidang=${bidangVal}&kodeKelompok=${val}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => {
+                        subkelSel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode));
+                    });
+                    if (savedFilterSubKelompok) { subkelSel.value = savedFilterSubKelompok; savedFilterSubKelompok = ''; }
+                });
+        });
+    });
+
+    function loadFilterGolongan() {
+        fetch('/api/KodeBarangApi/Golongan')
+            .then(r => r.json())
+            .then(data => {
+                var sel = document.getElementById('filterGolonganSelect');
+                data.forEach(item => {
+                    sel.add(new Option(`${item.kode} - ${item.uraian}`, item.kode));
+                });
+                if (savedFilterGolongan) { sel.value = savedFilterGolongan; sel.dispatchEvent(new Event('change')); savedFilterGolongan = ''; }
+            });
+    }
+
+    function loadGolonganDropdowns() {
+        fetch('/api/KodeBarangApi/Golongan')
+            .then(r => r.json())
+            .then(data => {
+                document.querySelectorAll('.dropdown-golongan').forEach(select => {
+                    var currentVal = select.value;
+                    select.innerHTML = '<option value="">-- Pilih Golongan --</option>';
+                    data.forEach(item => {
+                        select.innerHTML += `<option value="${item.kode}">${item.kode} - ${item.uraian}</option>`;
+                    });
+                    if (currentVal) select.value = currentVal;
+                });
+            });
+    }
+
+    // Cascading: Golongan → Bidang (for input forms)
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('dropdown-golongan') && e.target.dataset.cascade) {
+            var form = e.target.closest('form') || e.target.closest('.tab-pane');
+            var bidangSelect = form.querySelector('.dropdown-bidang');
+            if (!bidangSelect) return;
+            var kodeGolongan = e.target.value;
+            bidangSelect.innerHTML = '<option value="">-- Pilih Bidang --</option>';
+            var kelompokSelect = form.querySelector('.dropdown-kelompok');
+            if (kelompokSelect) kelompokSelect.innerHTML = '<option value="">-- Pilih --</option>';
+            var subkelompokSelect = form.querySelector('.dropdown-subkelompok');
+            if (subkelompokSelect) subkelompokSelect.innerHTML = '<option value="">-- Pilih --</option>';
+            if (!kodeGolongan) return;
+            fetch(`/api/KodeBarangApi/Bidang?kodeGolongan=${kodeGolongan}`)
+                .then(r => r.json())
+                .then(data => { data.forEach(item => { bidangSelect.innerHTML += `<option value="${item.kode}">${item.kode} - ${item.uraian}</option>`; }); });
+        }
+    });
+
+    // Cascading: Bidang → Kelompok (for input forms)
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('dropdown-bidang') && e.target.dataset.cascade) {
+            var form = e.target.closest('form') || e.target.closest('.tab-pane');
+            var golonganSelect = form.querySelector('.dropdown-golongan');
+            var kelompokSelect = form.querySelector('.dropdown-kelompok');
+            if (!kelompokSelect) return;
+            var kodeGolongan = golonganSelect.value;
+            var kodeBidang = e.target.value;
+            kelompokSelect.innerHTML = '<option value="">-- Pilih Kelompok --</option>';
+            var subkelompokSelect = form.querySelector('.dropdown-subkelompok');
+            if (subkelompokSelect) subkelompokSelect.innerHTML = '<option value="">-- Pilih --</option>';
+            if (!kodeGolongan || !kodeBidang) return;
+            fetch(`/api/KodeBarangApi/Kelompok?kodeGolongan=${kodeGolongan}&kodeBidang=${kodeBidang}`)
+                .then(r => r.json())
+                .then(data => { data.forEach(item => { kelompokSelect.innerHTML += `<option value="${item.kode}">${item.kode} - ${item.uraian}</option>`; }); });
+        }
+    });
+
+    // Cascading: Kelompok → Sub Kelompok (for input forms)
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('dropdown-kelompok') && e.target.dataset.cascade) {
+            var form = e.target.closest('form') || e.target.closest('.tab-pane');
+            var golonganSelect = form.querySelector('.dropdown-golongan');
+            var bidangSelect = form.querySelector('.dropdown-bidang');
+            var subkelompokSelect = form.querySelector('.dropdown-subkelompok');
+            if (!subkelompokSelect) return;
+            var kodeGolongan = golonganSelect.value;
+            var kodeBidang = bidangSelect.value;
+            var kodeKelompok = e.target.value;
+            subkelompokSelect.innerHTML = '<option value="">-- Pilih Sub Kelompok --</option>';
+            if (!kodeGolongan || !kodeBidang || !kodeKelompok) return;
+            fetch(`/api/KodeBarangApi/SubKelompok?kodeGolongan=${kodeGolongan}&kodeBidang=${kodeBidang}&kodeKelompok=${kodeKelompok}`)
+                .then(r => r.json())
+                .then(data => { data.forEach(item => { subkelompokSelect.innerHTML += `<option value="${item.kode}">${item.kode} - ${item.uraian}</option>`; }); });
+        }
+    });
+
+    function showEditModal(id, kode, uraian) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editKode').value = kode;
+        document.getElementById('editUraian').value = uraian;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+</script>
+}

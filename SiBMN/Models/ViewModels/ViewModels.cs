@@ -87,4 +87,35 @@ namespace SiBMN.Models.ViewModels
         public Pengajuan Pengajuan { get; set; } = null!;
         public List<DetailPengajuan> Details { get; set; } = new();
     }
+
+    public class KodeBarangCreateViewModel
+    {
+        [Required(ErrorMessage = "Level wajib dipilih")]
+        public string Level { get; set; } = "Golongan";
+
+        [Required(ErrorMessage = "Kode Golongan wajib diisi")]
+        [RegularExpression(@"^\d{1}$", ErrorMessage = "Kode Golongan harus 1 digit angka")]
+        [Display(Name = "Kode Golongan")]
+        public string KodeGolongan { get; set; } = string.Empty;
+
+        [RegularExpression(@"^\d{2}$", ErrorMessage = "Kode Bidang harus 2 digit angka")]
+        [Display(Name = "Kode Bidang")]
+        public string? KodeBidang { get; set; }
+
+        [RegularExpression(@"^\d{2}$", ErrorMessage = "Kode Kelompok harus 2 digit angka")]
+        [Display(Name = "Kode Kelompok")]
+        public string? KodeKelompok { get; set; }
+
+        [RegularExpression(@"^\d{2}$", ErrorMessage = "Kode Sub Kelompok harus 2 digit angka")]
+        [Display(Name = "Kode Sub Kelompok")]
+        public string? KodeSubKelompok { get; set; }
+
+        [RegularExpression(@"^\d{3}$", ErrorMessage = "Kode Barang harus 3 digit angka")]
+        [Display(Name = "Kode Barang")]
+        public string? KodeBarangValue { get; set; }
+
+        [Required(ErrorMessage = "Uraian Barang wajib diisi")]
+        [Display(Name = "Uraian Barang")]
+        public string UraianBarang { get; set; } = string.Empty;
+    }
 }

@@ -38,6 +38,22 @@
                     <i class="fas fa-plus-circle"></i>
                     <span>Buat Pengajuan Baru</span>
                 </a>
+                @if (Context.Session.GetInt32("RoleId") == 1)
+                {
+                    <div class="sidebar-section-title">Barang Modal</div>
+                    <a href="@Url.Action("Index", "BarangModal")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BarangModal" ? "active" : "")">
+                        <i class="fas fa-boxes-stacked"></i>
+                        <span>Daftar Barang Modal</span>
+                    </a>
+                }
+                @if (Context.Session.GetInt32("RoleId") == 4)
+                {
+                    <div class="sidebar-section-title">Tim Kerja BMN</div>
+                    <a href="@Url.Action("Index", "KodeBarang")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "KodeBarang" ? "active" : "")">
+                        <i class="fas fa-barcode"></i>
+                        <span>Data Master Kode Barang</span>
+                    </a>
+                }
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-user">

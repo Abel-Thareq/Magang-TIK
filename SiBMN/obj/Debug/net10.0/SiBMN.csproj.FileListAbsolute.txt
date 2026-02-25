@@ -250,3 +250,4 @@ C:\Users\workpro\Documents\Abel\Magang TIK\SiBMN\bin\Debug\net10.0\runtimes\win-
 C:\Users\workpro\Documents\Abel\Magang TIK\SiBMN\bin\Debug\net10.0\runtimes\win-x64\native\e_sqlite3.dll
 C:\Users\workpro\Documents\Abel\Magang TIK\SiBMN\bin\Debug\net10.0\runtimes\win-x86\native\e_sqlite3.dll
 C:\Users\workpro\Documents\Abel\Magang TIK\SiBMN\obj\Debug\net10.0\compressed\oendrbynt5-{0}-22vk556v81-22vk556v81.gz
+C:\Users\workpro\Documents\Abel\Magang TIK\SiBMN\obj\Debug\net10.0\SiBMN.sourcelink.json
