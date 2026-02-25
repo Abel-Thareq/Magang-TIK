@@ -1,0 +1,193 @@
+@model SiBMN.Models.ViewModels.DetailPengajuanCreateViewModel
+@{
+    ViewData["Title"] = "Edit Barang Modal";
+    var detailId = ViewBag.DetailId;
+}
+
+<div class="fade-in">
+    <div class="mb-4">
+        <a href="@Url.Action("Details", "Pengajuan", new { id = Model.IdPengajuan })" class="btn-outline-custom mb-3" style="font-size:0.8rem;">
+            <i class="fas fa-arrow-left"></i> Kembali ke Detail Pengajuan
+        </a>
+    </div>
+
+    <form asp-action="Edit" asp-route-id="@detailId" method="post">
+        <input type="hidden" asp-for="IdPengajuan" />
+
+        <!-- Informasi Barang -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-box"></i> Informasi Barang
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="IdBarang" class="form-label">
+                        Nama Barang <span class="required-star">*</span>
+                    </label>
+                    <select asp-for="IdBarang" asp-items="@(ViewBag.Barangs as SelectList)" class="form-select" id="barangSelect">
+                        <option value="">-- Cari & Pilih Barang --</option>
+                    </select>
+                    <span asp-validation-for="IdBarang" class="text-danger" style="font-size:0.8rem;"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Satuan</label>
+                    <input type="text" class="form-control" id="satuanDisplay" disabled />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Spesifikasi" class="form-label">Spesifikasi</label>
+                    <textarea asp-for="Spesifikasi" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume & Harga -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-calculator"></i> Volume & Harga
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="JumlahDiminta" class="form-label">Volume <span class="required-star">*</span></label>
+                    <input asp-for="JumlahDiminta" class="form-control" type="number" min="1" oninput="calculateTotal()" id="JumlahDiminta" />
+                    <span asp-validation-for="JumlahDiminta" class="text-danger" style="font-size:0.8rem;"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="HargaSatuan" class="form-label">Harga Satuan (Rp) <span class="required-star">*</span></label>
+                    <input asp-for="HargaSatuan" class="form-control" type="number" min="0" step="1" oninput="calculateTotal()" id="HargaSatuan" />
+                    <span asp-validation-for="HargaSatuan" class="text-danger" style="font-size:0.8rem;"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Jumlah Harga</label>
+                    <input type="text" class="form-control" id="JumlahHarga" disabled style="font-weight:700; color:var(--primary);" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Lokasi Penempatan -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-map-marker-alt"></i> Lokasi Penempatan
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Filter Gedung <span class="required-star">*</span></label>
+                    <select class="form-select" id="gedungSelect" onchange="filterRuangByGedung()">
+                        <option value="">-- Pilih Gedung --</option>
+                        @foreach (var gedung in ViewBag.Gedungs as List<string>)
+                        {
+                            <option value="@gedung">@gedung</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="IdRuang" class="form-label">Ruang <span class="required-star">*</span></label>
+                    <select asp-for="IdRuang" asp-items="@(ViewBag.Ruangs as SelectList)" class="form-select" id="IdRuang">
+                        <option value="">-- Pilih Ruang --</option>
+                    </select>
+                    <span asp-validation-for="IdRuang" class="text-danger" style="font-size:0.8rem;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fungsi & Asal Barang -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-info-circle"></i> Fungsi & Asal Barang
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="FungsiBarang" class="form-label">Fungsi Barang</label>
+                    <textarea asp-for="FungsiBarang" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Asal Barang <span class="required-star">*</span></label>
+                    <div class="d-flex gap-4 mt-1">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="AsalBarang" value="PDN" id="asalPDN"
+                                   @(Model.AsalBarang == "PDN" ? "checked" : "") onchange="handleAsalBarang()" />
+                            <label class="form-check-label" for="asalPDN"><strong>PDN</strong></label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="AsalBarang" value="Import" id="asalImport"
+                                   @(Model.AsalBarang == "Import" ? "checked" : "") onchange="handleAsalBarang()" />
+                            <label class="form-check-label" for="asalImport"><strong>Import</strong></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 conditional-field" id="importField">
+                    <label asp-for="AlasanImport" class="form-label">Alasan Pemilihan Produk Import</label>
+                    <textarea asp-for="AlasanImport" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-12 conditional-field" id="pdnField">
+                    <label class="form-label">Upload Sertifikat TKDN</label>
+                    <input type="file" class="form-control" accept=".pdf,.jpg,.png" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Link & Gambar -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-link"></i> Link Survey & Gambar
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="LinkSurvey" class="form-label">Link Survey (e-katalog)</label>
+                    <input asp-for="LinkSurvey" class="form-control" />
+                    <div class="form-text"><span class="required-star">*</span> wajib dari e-katalog</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Gambar di Link e-katalog</label>
+                    <input type="file" class="form-control" accept="image/*" />
+                    <div class="form-text">Ukuran gambar max 2MB</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn-primary-custom">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
+            <a href="@Url.Action("Details", "Pengajuan", new { id = Model.IdPengajuan })" class="btn-outline-custom">
+                <i class="fas fa-times"></i> Batal
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var satuanMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BarangSatuanMap as Dictionary<int, string>));
+
+        document.getElementById('barangSelect').addEventListener('change', function() {
+            var barangId = parseInt(this.value);
+            var satuanField = document.getElementById('satuanDisplay');
+            satuanField.value = satuanMap[barangId] || '';
+        });
+
+        // Init
+        handleAsalBarang();
+        calculateTotal();
+
+        // Set initial satuan
+        var initBarangId = parseInt(document.getElementById('barangSelect').value);
+        if (satuanMap[initBarangId]) {
+            document.getElementById('satuanDisplay').value = satuanMap[initBarangId];
+        }
+    </script>
+}

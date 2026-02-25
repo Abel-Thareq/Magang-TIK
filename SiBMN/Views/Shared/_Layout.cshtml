@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Si BMN</title>
+    <meta name="description" content="Sistem Informasi Barang Milik Negara" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (Context.Session.GetInt32("UserId") != null)
+    {
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-building-columns"></i>
+                    <span>Si BMN</span>
+                </div>
+                <button class="sidebar-toggle d-lg-none" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="@Url.Action("Index", "Dashboard")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <div class="sidebar-section-title">Pengajuan</div>
+                <a href="@Url.Action("Index", "Pengajuan")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Pengajuan" ? "active" : "")">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Daftar Pengajuan</span>
+                </a>
+                <a href="@Url.Action("Create", "Pengajuan")" class="sidebar-link">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Buat Pengajuan Baru</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name">@Context.Session.GetString("UserName")</div>
+                        <div class="sidebar-user-role">@Context.Session.GetString("RoleName")</div>
+                    </div>
+                </div>
+                <a href="@Url.Action("Logout", "Account")" class="sidebar-link logout-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Keluar</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button class="sidebar-toggle d-lg-none" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topbar-title">
+                    <h1>@ViewData["Title"]</h1>
+                    <span class="topbar-breadcrumb">@Context.Session.GetString("UnitName")</span>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-user">
+                        <span class="d-none d-md-inline">@Context.Session.GetString("UserName")</span>
+                        <div class="topbar-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @RenderBody()
+            </div>
+        </div>
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

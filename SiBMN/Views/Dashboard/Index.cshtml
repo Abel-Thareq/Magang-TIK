@@ -1,0 +1,84 @@
+@using SiBMN.Data
+@inject ApplicationDbContext DbContext
+@{
+    ViewData["Title"] = "Dashboard";
+    var unitId = Context.Session.GetInt32("UnitId") ?? 0;
+    var roleId = Context.Session.GetInt32("RoleId") ?? 0;
+    var userName = Context.Session.GetString("UserName") ?? "User";
+
+    var query = DbContext.Pengajuans.AsQueryable();
+    if (roleId == 1) query = query.Where(p => p.UnitId == unitId);
+
+    var totalPengajuan = query.Count();
+    var draftCount = query.Count(p => p.Status == "draft");
+    var approvedCount = query.Count(p => p.Status == "approved");
+    var totalBarang = DbContext.DetailPengajuans.Count(d => query.Select(p => p.IdPengajuan).Contains(d.IdPengajuan));
+}
+
+<div class="fade-in">
+    <div class="mb-4">
+        <h2 style="font-size:1.5rem; font-weight:700; color:var(--text-primary);">
+            Selamat Datang, @userName! 👋
+        </h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem;">
+            Kelola pengajuan barang modal unit kerja Anda dari sini.
+        </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div>
+                <div class="stat-value">@totalPengajuan</div>
+                <div class="stat-label">Total Pengajuan</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon amber">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="stat-value">@draftCount</div>
+                <div class="stat-label">Draft</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value">@approvedCount</div>
+                <div class="stat-label">Diajukan</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="fas fa-boxes-stacked"></i>
+            </div>
+            <div>
+                <div class="stat-value">@totalBarang</div>
+                <div class="stat-label">Total Item Barang</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-bolt me-2" style="color:var(--accent);"></i> Aksi Cepat
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                <a href="@Url.Action("Create", "Pengajuan")" class="btn-primary-custom">
+                    <i class="fas fa-plus-circle"></i> Buat Pengajuan Baru
+                </a>
+                <a href="@Url.Action("Index", "Pengajuan")" class="btn-outline-custom">
+                    <i class="fas fa-list"></i> Lihat Semua Pengajuan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

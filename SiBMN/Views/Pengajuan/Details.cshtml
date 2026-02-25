@@ -1,0 +1,228 @@
+@model SiBMN.Models.ViewModels.PengajuanDetailViewModel
+@{
+    ViewData["Title"] = "Detail Pengajuan #" + Model.Pengajuan.IdPengajuan;
+}
+
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="detail-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h2><i class="fas fa-file-invoice me-2"></i>Pengajuan Barang Modal</h2>
+                <span style="font-size:0.85rem; opacity:0.9;">
+                    ID: #@Model.Pengajuan.IdPengajuan |
+                    @if (Model.Pengajuan.Status == "draft")
+                    {
+                        <span class="badge bg-warning text-dark">Draft</span>
+                    }
+                    else if (Model.Pengajuan.Status == "approved")
+                    {
+                        <span class="badge bg-success">Diajukan</span>
+                    }
+                </span>
+            </div>
+            <div>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
+
+        <div class="detail-info-grid">
+            <div class="detail-info-item">
+                <label>Tanggal Pengajuan</label>
+                <span>@Model.Pengajuan.TanggalPengajuan.ToString("dd MMMM yyyy")</span>
+            </div>
+            <div class="detail-info-item">
+                <label>Unit Kerja</label>
+                <span>@Model.Pengajuan.Unit?.NamaUnit</span>
+            </div>
+            <div class="detail-info-item">
+                <label>Total Harga</label>
+                <span>Rp @Model.Pengajuan.TotalHarga.ToString("N0")</span>
+            </div>
+            <div class="detail-info-item">
+                <label>Jumlah Item</label>
+                <span>@Model.Details.Count barang</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Surat Info -->
+    <div class="info-card">
+        <div class="info-card-title">
+            <i class="fas fa-envelope"></i> Informasi Surat
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>No. Surat Rektor</label>
+                <span>@(Model.Pengajuan.NoSuratRektor ?? "-")</span>
+            </div>
+            <div class="info-item">
+                <label>Tgl. Surat Rektor</label>
+                <span>@(Model.Pengajuan.TglSuratRektor?.ToString("dd MMM yyyy") ?? "Belum terkonfirmasi")</span>
+            </div>
+            <div class="info-item">
+                <label>Tahun Anggaran</label>
+                <span>@(Model.Pengajuan.TahunAnggaran?.ToString() ?? "-")</span>
+            </div>
+            <div class="info-item">
+                <label>Jabatan Penandatangan</label>
+                <span>@(Model.Pengajuan.Jabatan ?? "-")</span>
+            </div>
+            <div class="info-item">
+                <label>Pejabat Penandatangan</label>
+                <span>@(Model.Pengajuan.Pejabat?.Nama ?? "-")</span>
+            </div>
+            <div class="info-item">
+                <label>Jenis Pengajuan</label>
+                <span>@(Model.Pengajuan.JenisPengajuan ?? "Belanja Modal")</span>
+            </div>
+        </div>
+
+        @if (Model.Pengajuan.Status == "draft")
+        {
+            <div class="mt-3">
+                <a href="@Url.Action("Edit", new { id = Model.Pengajuan.IdPengajuan })" class="btn-sm-action btn-edit">
+                    <i class="fas fa-pencil"></i> Edit Data Surat
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Daftar Barang -->
+    <div class="table-container">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fas fa-boxes-stacked me-2"></i>Daftar Barang Modal
+            </div>
+            @if (Model.Pengajuan.Status == "draft")
+            {
+                <a href="@Url.Action("Create", "DetailPengajuan", new { pengajuanId = Model.Pengajuan.IdPengajuan })" class="btn-primary-custom" style="font-size:0.8rem;">
+                    <i class="fas fa-plus"></i> Tambah Barang
+                </a>
+            }
+        </div>
+
+        @if (Model.Details.Any())
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">No</th>
+                            <th>Nama Barang</th>
+                            <th>Spesifikasi</th>
+                            <th>Volume</th>
+                            <th>Satuan</th>
+                            <th>Harga Satuan</th>
+                            <th>Jumlah Harga</th>
+                            <th>Lokasi</th>
+                            <th>Asal</th>
+                            @if (Model.Pengajuan.Status == "draft")
+                            {
+                                <th style="width:130px;">Aksi</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Details)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">@item.NoPrioritas</span>
+                                </td>
+                                <td>
+                                    <strong>@item.MasterBarang?.NamaBarang</strong>
+                                </td>
+                                <td style="max-width:200px; font-size:0.82rem; color:var(--text-secondary);">
+                                    @(item.Spesifikasi ?? item.MasterBarang?.Spesifikasi ?? "-")
+                                </td>
+                                <td>@item.JumlahDiminta</td>
+                                <td>@item.MasterBarang?.Satuan</td>
+                                <td class="currency">Rp @item.HargaSatuan.ToString("N0")</td>
+                                <td class="currency" style="color:var(--primary); font-weight:700;">
+                                    Rp @item.JumlahHarga.ToString("N0")
+                                </td>
+                                <td style="font-size:0.82rem;">
+                                    @item.RuangGedung?.NamaGedung<br />
+                                    <small class="text-muted">@item.RuangGedung?.NamaRuang</small>
+                                </td>
+                                <td>
+                                    @if (item.AsalBarang == "Import")
+                                    {
+                                        <span class="badge bg-info">Import</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">PDN</span>
+                                    }
+                                </td>
+                                @if (Model.Pengajuan.Status == "draft")
+                                {
+                                    <td>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <form asp-controller="DetailPengajuan" asp-action="MoveUp" asp-route-id="@item.IdDetPengajuan" method="post" class="d-inline">
+                                                <button type="submit" class="btn-sm-action btn-move" title="Naikkan Prioritas">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-controller="DetailPengajuan" asp-action="MoveDown" asp-route-id="@item.IdDetPengajuan" method="post" class="d-inline">
+                                                <button type="submit" class="btn-sm-action btn-move" title="Turunkan Prioritas">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                            </form>
+                                            <a href="@Url.Action("Edit", "DetailPengajuan", new { id = item.IdDetPengajuan })" class="btn-sm-action btn-edit" title="Edit">
+                                                <i class="fas fa-pencil"></i>
+                                            </a>
+                                            <form asp-controller="DetailPengajuan" asp-action="Delete" asp-route-id="@item.IdDetPengajuan" method="post" class="d-inline" onsubmit="return confirmDelete()">
+                                                <button type="submit" class="btn-sm-action btn-delete" title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="6" style="text-align:right; font-size:1rem;">
+                                <strong>TOTAL</strong>
+                            </td>
+                            <td class="currency" style="font-size:1.05rem;">
+                                Rp @Model.Pengajuan.TotalHarga.ToString("N0")
+                            </td>
+                            <td colspan="@(Model.Pengajuan.Status == "draft" ? "3" : "2")"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>Belum Ada Barang</h3>
+                <p>Belum ada barang yang ditambahkan ke pengajuan ini. Klik tombol di bawah untuk menambahkan barang.</p>
+                <a href="@Url.Action("Create", "DetailPengajuan", new { pengajuanId = Model.Pengajuan.IdPengajuan })" class="btn-primary-custom">
+                    <i class="fas fa-plus-circle"></i> Tambah Barang Pertama
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Action Buttons -->
+    @if (Model.Pengajuan.Status == "draft" && Model.Details.Any())
+    {
+        <div class="d-flex gap-3 mt-4">
+            <form asp-action="Submit" asp-route-id="@Model.Pengajuan.IdPengajuan" method="post"
+                  onsubmit="return confirm('Yakin ingin mengajukan pengajuan ini? Pengajuan yang sudah diajukan tidak dapat diubah.')">
+                <button type="submit" class="btn-primary-custom" style="padding:0.75rem 2rem;">
+                    <i class="fas fa-paper-plane"></i> Ajukan Pengajuan
+                </button>
+            </form>
+        </div>
+    }
+</div>

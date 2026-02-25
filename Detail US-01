@@ -1,0 +1,32 @@
+US-01 : Input Data Barang Modal
+Sebagai Admin Unit Kerja
+Saya ingin: mengisi formulir pengajuan barang modal untuk kebutuhan tahun berikutnya secara online agar saya dapat mengubah data barang modal sebelum diajukan ke tim pengadaan
+Kriteria Penerimaan:
+ Sistem harus menyediakan formulir pangajuan barang dengan data input:
+No (otomatis berdasarkan prioritas)
+Nama barang (pengisian menggunakan input field drop down dan ada fungsi search karena banyaknya data barang)
+Spesifikasi (deskripsi dengan unlimited karakter)
+Volume (hanya menerima input angka)
+Satuan (input dropdown data satuan)
+Harga satuan (hanya menerima input angka)
+Jumlah harga (hasil perkalian volume dan harga satuan)
+Unit kerja (input dropdown, data yang muncul disesuaikan dengan role user)
+Kode ruang lokasi penempatan (terdapat 2 input dropdown, yaitu  Filter Gedung dan Ruang)
+Fungsi (deskripsi)
+Asal barang (input radio buttons dengan pilihan Import dan PDN.) 
+Alasan pemilihan produk import (apabila memilih import maka muncul input field teks)
+Upload sertifikat TKDN (apabila memilih PDN maka muncul input field unggah dokumen)
+Link survey (input field text untuk menampung data link dan beri keterangan *wajib dari e-katalog)
+Gambar di link e-katalog (input unggah gambar dan beri keterangan ukuran gambar max 2Mb )
+Saya bisa melakukan pengisian daftar barang bisa dilakukan sepanjang tahun, tapi yang diinputkan hanya bisa dilihat oleh Admin Unit Kerja
+Saya bisa mengubah urutan data barang yang dinputkan agar sesuai dengan urutan prioritas.
+Saya bisa melakukan generate surat pengajuan setelah melakukan input data surat berikut:
+Nomor surat pengajuan (nomor surat terdiri dari angka, huruf dan simbol)
+Tanggal pengajuan (input field date)
+Tahun anggaran pengajuan belanja modal (input field hanya berupa angka)
+Nomor surat Rektor tentang Permohonan Penyusunan Usulan Belanja Modal (nomor surat terdiri dari angka, huruf dan simbol, nantinya akan dikonfirmasi ke SILA)
+Tanggal dikeluarkannya surat Rektor (otomatis terisi apabila nomor surat rektor sudah terkonfirmasi)
+Total jumlah harga (terisi otomatis berdasarkan data dari formulir pengajuan barang)
+Jabatan Penandatangan Surat permohonan (input field teks)
+Nama Pejabat Penandatangan (pengisian menggunakan input field drop down dan ada fungsi search karena banyaknya data pegawai)
+NIP Pejabat Penandatangan (otomatis terisi sesuai dengan data pegawai yang dipililh)

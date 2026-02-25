@@ -1,0 +1,66 @@
+@model SiBMN.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="login-page">
+    <div class="login-bg"></div>
+
+    <div class="login-container">
+
+        <!-- LEFT: Logos + Welcome Text -->
+        <div class="login-left">
+            <div class="login-logos">
+                <img src="~/logo-untidar.png" alt="Logo Untidar" class="login-logo-img" />
+                <img src="~/logo-BLU.png" alt="Logo BLU" class="login-logo-img" />
+            </div>
+            <div class="login-welcome">
+                <p class="welcome-text">Welcome Back</p>
+                <p class="welcome-text welcome-to">To</p>
+                <h1 class="welcome-brand">SiBMN</h1>
+            </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="login-divider"></div>
+
+        <!-- RIGHT: Form -->
+        <div class="login-right">
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="All" class="login-error"></div>
+
+                <div class="login-input-wrap">
+                    <i class="fas fa-user login-field-icon"></i>
+                    <input asp-for="Email" class="login-field" placeholder="Username" autocomplete="username" />
+                </div>
+
+                <div class="login-input-wrap">
+                    <i class="fas fa-lock login-field-icon"></i>
+                    <input asp-for="Password" class="login-field" placeholder="Password" id="pwInput" autocomplete="current-password" />
+                    <button type="button" class="login-eye-btn" onclick="togglePw()">
+                        <i class="fas fa-eye" id="eyeIco"></i>
+                    </button>
+                </div>
+
+                <div class="login-btn-wrap-right">
+                    <button type="submit" class="login-btn-submit">Login</button>
+                </div>
+            </form>
+
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePw() {
+            var i = document.getElementById('pwInput');
+            var ic = document.getElementById('eyeIco');
+            i.type = i.type === 'password' ? 'text' : 'password';
+            ic.className = i.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+    </script>
+}

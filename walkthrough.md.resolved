@@ -1,0 +1,62 @@
+# Si BMN - Walkthrough
+
+Sistem Informasi Barang Milik Negara — implementasi fitur **US-01: Input Data Barang Modal** menggunakan ASP.NET Core MVC + Entity Framework Core + SQLite.
+
+## Hasil Implementasi
+
+### Halaman Login
+Halaman login full-screen dengan gradient hijau dan card centered. Terdapat info akun demo.
+
+![Login Page](C:\Users\workpro\.gemini\antigravity\brain\b57222d7-6dbb-4ca8-9d79-cd5f71b100a6\login_page_1771898265006.png)
+
+### Dashboard
+Setelah login, dashboard menampilkan statistik (Total Pengajuan, Draft, Diajukan, Total Item Barang) dengan sidebar navigasi dan info user.
+
+![Dashboard](C:\Users\workpro\.gemini\antigravity\brain\b57222d7-6dbb-4ca8-9d79-cd5f71b100a6\dashboard_page_1771898320522.png)
+
+### Daftar Pengajuan
+Halaman list pengajuan dengan empty state dan tombol "Buat Pengajuan Baru".
+
+![Daftar Pengajuan](C:\Users\workpro\.gemini\antigravity\brain\b57222d7-6dbb-4ca8-9d79-cd5f71b100a6\daftar_pengajuan_page_1771898336077.png)
+
+### Form Pengajuan Baru
+Form multi-section: Data Surat Pengajuan, Data Surat Rektor, Data Penandatangan.
+
+![Form Pengajuan](C:\Users\workpro\.gemini\antigravity\brain\b57222d7-6dbb-4ca8-9d79-cd5f71b100a6\buat_pengajuan_form_page_1771898352205.png)
+
+### Demo Flow
+![Demo Recording](C:\Users\workpro\.gemini\antigravity\brain\b57222d7-6dbb-4ca8-9d79-cd5f71b100a6\sibmn_full_test_1771898246397.webp)
+
+---
+
+## Struktur Project
+
+| Komponen | File |
+|----------|------|
+| **Models (12)** | Role, User, Unit, KategoriBarang, MasterBarang, Pengajuan, DetailPengajuan, RuangGedung, StokPersediaan, AsetInventaris, PenerimaanBarang, MutasiAset |
+| **Controllers (5)** | AccountController, DashboardController, PengajuanController, DetailPengajuanController, BarangApiController |
+| **Views (7)** | Login, Dashboard, Pengajuan (Index/Create/Edit/Details), DetailPengajuan (Create/Edit) |
+| **Database** | SQLite (`SiBMN.db`) with auto-migration and seed data |
+
+## Fitur US-01 yang Diimplementasikan
+
+- ✅ Form pengajuan dengan dropdown search nama barang
+- ✅ Spesifikasi (unlimited karakter)
+- ✅ Volume (hanya angka) × Harga satuan = Jumlah harga otomatis
+- ✅ Dropdown satuan (otomatis dari master barang)
+- ✅ Lokasi: 2-level dropdown (Filter Gedung → Ruang)
+- ✅ Asal barang: radio button Import/PDN + conditional fields
+- ✅ Link survey e-katalog + upload gambar
+- ✅ Prioritas barang bisa diubah (Move Up/Down)
+- ✅ Data surat pengajuan lengkap (nomor surat, tanggal, tahun anggaran, rektor, pejabat)
+- ✅ Status draft → diajukan
+
+## Cara Menjalankan
+
+```bash
+cd "c:\Users\workpro\Documents\Abel\Magang TIK\SiBMN"
+dotnet run
+# Buka http://localhost:5283
+```
+
+**Akun Demo:** `admin.teknik@univ.ac.id` / `admin123`

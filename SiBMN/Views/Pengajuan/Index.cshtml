@@ -1,0 +1,99 @@
+@model IEnumerable<SiBMN.Models.Pengajuan>
+@{
+    ViewData["Title"] = "Daftar Pengajuan";
+}
+
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 style="font-size:1.3rem; font-weight:700;">Daftar Pengajuan Barang Modal</h2>
+            <p style="color:var(--text-secondary); font-size:0.875rem;">
+                Kelola semua pengajuan barang modal unit kerja Anda
+            </p>
+        </div>
+        <a href="@Url.Action("Create")" class="btn-primary-custom">
+            <i class="fas fa-plus-circle"></i> Buat Pengajuan Baru
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Unit Kerja</th>
+                        <th>Jenis</th>
+                        <th>Jumlah Item</th>
+                        <th>Total Harga</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var no = 1; }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@(no++)</td>
+                            <td>@item.TanggalPengajuan.ToString("dd MMM yyyy")</td>
+                            <td>@item.Unit?.NamaUnit</td>
+                            <td>@(item.JenisPengajuan ?? "Belanja Modal")</td>
+                            <td>
+                                <span class="badge bg-secondary">@item.DetailPengajuans.Count item</span>
+                            </td>
+                            <td class="currency">Rp @item.TotalHarga.ToString("N0")</td>
+                            <td>
+                                @if (item.Status == "draft")
+                                {
+                                    <span class="badge-status badge-draft">Draft</span>
+                                }
+                                else if (item.Status == "approved")
+                                {
+                                    <span class="badge-status badge-approved">Diajukan</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-disapproved">Ditolak</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="@Url.Action("Details", new { id = item.IdPengajuan })" class="btn-sm-action btn-edit" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (item.Status == "draft")
+                                    {
+                                        <a href="@Url.Action("Edit", new { id = item.IdPengajuan })" class="btn-sm-action btn-edit" title="Edit">
+                                            <i class="fas fa-pencil"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.IdPengajuan" method="post" class="d-inline" onsubmit="return confirmDelete('Yakin ingin menghapus pengajuan ini beserta semua datanya?')">
+                                            <button type="submit" class="btn-sm-action btn-delete" title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="table-container">
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>Belum Ada Pengajuan</h3>
+                <p>Anda belum membuat pengajuan barang modal. Klik tombol di bawah untuk membuat pengajuan baru.</p>
+                <a href="@Url.Action("Create")" class="btn-primary-custom">
+                    <i class="fas fa-plus-circle"></i> Buat Pengajuan Pertama
+                </a>
+            </div>
+        </div>
+    }
+</div>
