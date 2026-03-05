@@ -109,7 +109,7 @@ export default function KodeBarangIndex() {
     const tabs = ['Golongan', 'Bidang', 'Kelompok', 'SubKelompok', 'KodeBarang'];
 
     const getLevelBadge = (level) => {
-        const colors = { Golongan: '#1B5E20', Bidang: '#1565C0', Kelompok: '#6A1B9A', 'Sub Kelompok': '#E65100', 'Kode Barang': '#C62828' };
+        const colors = { Golongan: '#ca8a04', Bidang: '#1565C0', Kelompok: '#6A1B9A', 'Sub Kelompok': '#E65100', 'Kode Barang': '#C62828' };
         return <span className="badge" style={{ background: colors[level] || '#666', fontSize: '0.7rem' }}>{level}</span>;
     };
 
@@ -132,7 +132,7 @@ export default function KodeBarangIndex() {
                     <ul className="nav nav-tabs mb-3">
                         {tabs.map(tab => (
                             <li className="nav-item" key={tab}>
-                                <button className={`nav-link ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)} style={activeTab === tab ? { color: 'var(--primary)', fontWeight: 600 } : {}}>
+                                <button className={`nav-link ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)} style={activeTab === tab ? { color: '#1a1a2e', fontWeight: 600 } : { color: '#1a1a2e' }}>
                                     {tab === 'SubKelompok' ? 'Sub Kelompok' : tab === 'KodeBarang' ? 'Kode Barang' : tab}
                                 </button>
                             </li>

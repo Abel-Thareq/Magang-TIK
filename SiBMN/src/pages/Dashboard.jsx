@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { apiGet, formatDate } from '../api/api';
+import { apiGet, apiPost, apiDelete, formatDate } from '../api/api';
 
 const DONUT_COLORS = ['#4FC3F7', '#AB47BC', '#FF9800', '#EF5350', '#66BB6A', '#26C6DA', '#FFA726'];
 
@@ -43,11 +43,9 @@ function DonutChart({ data, total }) {
 }
 
 function WeekCalendar() {
+    const { user } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [events, setEvents] = useState(() => {
-        const saved = sessionStorage.getItem('sibmn-events');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [events, setEvents] = useState([]);
     const [showAddEvent, setShowAddEvent] = useState(false);
     const [newEvent, setNewEvent] = useState({ time: '', description: '' });
 
@@ -88,70 +86,97 @@ function WeekCalendar() {
 
     const displayMonth = weekDays[3]; // Use middle of week for month name
     const monthKey = `${displayMonth.getFullYear()}-${String(displayMonth.getMonth() + 1).padStart(2, '0')}`;
-    const monthEvents = events.filter(e => e.month === monthKey);
 
-    const addEvent = () => {
-        if (!newEvent.time || !newEvent.description) return;
-        const updated = [...events, { ...newEvent, month: monthKey, id: Date.now() }];
-        setEvents(updated);
-        sessionStorage.setItem('sibmn-events', JSON.stringify(updated));
-        setNewEvent({ time: '', description: '' });
-        setShowAddEvent(false);
+    // Fetch events from API
+    const loadEvents = () => {
+        if (!user?.userId) return;
+        apiGet(`/JadwalApi?userId=${user.userId}&bulan=${monthKey}`)
+            .then(data => { if (data) setEvents(data); });
     };
 
-    const deleteEvent = (id) => {
-        const updated = events.filter(e => e.id !== id);
-        setEvents(updated);
-        sessionStorage.setItem('sibmn-events', JSON.stringify(updated));
+    useEffect(() => {
+        loadEvents();
+    }, [user, monthKey]);
+
+    const addEvent = async () => {
+        try {
+            if (!newEvent.time) return alert("Pilih waktu terlebih dahulu!");
+            if (!newEvent.description) return alert("Isi keterangan jadwal!");
+            if (!user) return alert("Error: User belum login / tidak terdeteksi");
+            if (!user.userId && !user.idUser) return alert("Error: ID User tidak ditemukan dalam data sesi");
+
+            const reqUserId = user.userId || user.idUser;
+
+            const res = await apiPost(`/JadwalApi`, {
+                userId: reqUserId,
+                bulan: monthKey,
+                waktu: newEvent.time,
+                keterangan: newEvent.description
+            });
+
+            if (res) {
+                setNewEvent({ time: '', description: '' });
+                setShowAddEvent(false);
+                loadEvents();
+                alert("Jadwal berhasil ditambahkan!");
+            } else {
+                alert("Gagal menyimpan jadwal (API mengembalikan null)");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Terjadi kesalahan jaringan/server: " + err.message);
+        }
+    };
+
+    const deleteEvent = async (id) => {
+        const res = await apiDelete(`/JadwalApi/${id}`);
+        if (res) loadEvents();
     };
 
     return (
-        <div className="dash-calendar">
-            <div className="dash-cal-top">
-                <button className="dash-cal-add-btn" onClick={() => setShowAddEvent(!showAddEvent)} title="Tambah Jadwal">
-                    <i className="fas fa-plus"></i>
-                </button>
-                <div className="dash-cal-month-label">
-                    <i className="fas fa-calendar-alt"></i>
-                    <span>{monthNames[displayMonth.getMonth()]} <i className="fas fa-caret-down" style={{ fontSize: '0.7rem', marginLeft: '2px' }}></i></span>
+        <div className="calendar-widget">
+            <div className="cal-header-section">
+                <div className="cal-top">
+                    <i className="fas fa-plus-circle" style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => setShowAddEvent(!showAddEvent)}></i>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                        <i className="far fa-calendar-alt"></i>
+                        <span>{monthNames[displayMonth.getMonth()]} <i className="fas fa-caret-down" style={{ fontSize: '0.7rem' }}></i></span>
+                    </div>
                 </div>
-            </div>
-
-            <div className="dash-cal-week-header">
-                {dayLabels.map((d, i) => <span key={i} className="dash-cal-day-label">{d}</span>)}
-            </div>
-
-            <div className="dash-cal-week-row">
-                <button className="dash-cal-arrow" onClick={prevWeek}><i className="fas fa-chevron-left"></i></button>
-                {weekDays.map((d, i) => (
-                    <span key={i} className={`dash-cal-date ${isToday(d) ? 'today' : ''} ${isSunday(d) ? 'sunday' : ''}`}>
-                        {d.getDate()}
-                    </span>
-                ))}
-                <button className="dash-cal-arrow" onClick={nextWeek}><i className="fas fa-chevron-right"></i></button>
+                <div className="cal-days">
+                    {dayLabels.map((d, i) => <div key={i}>{d}</div>)}
+                </div>
+                <div className="cal-numbers">
+                    <div><i className="fas fa-chevron-left" style={{ fontSize: '10px', cursor: 'pointer' }} onClick={prevWeek}></i></div>
+                    {weekDays.map((d, i) => (
+                        <div key={i} className={isSunday(d) ? 'sunday-date' : ''}>
+                            {isToday(d) ? (
+                                <div className="active-date">{d.getDate()}</div>
+                            ) : d.getDate()}
+                        </div>
+                    ))}
+                    <div><i className="fas fa-chevron-right" style={{ fontSize: '10px', cursor: 'pointer' }} onClick={nextWeek}></i></div>
+                </div>
             </div>
 
             {/* Add Event Form */}
             {showAddEvent && (
-                <div className="dash-cal-add-form">
+                <div className="cal-add-form">
                     <input type="time" value={newEvent.time} onChange={e => setNewEvent({ ...newEvent, time: e.target.value })} />
                     <input type="text" placeholder="Keterangan jadwal..." value={newEvent.description} onChange={e => setNewEvent({ ...newEvent, description: e.target.value })} />
                     <button onClick={addEvent}><i className="fas fa-check"></i></button>
                 </div>
             )}
 
-            {/* Events List */}
-            {monthEvents.length > 0 && (
-                <div className="dash-cal-events">
-                    {monthEvents.map(e => (
-                        <div key={e.id} className="dash-cal-event">
-                            <span className="dash-cal-event-time">{e.time}</span>
-                            <span className="dash-cal-event-text">{e.description}</span>
-                            <button className="dash-cal-event-del" onClick={() => deleteEvent(e.id)}><i className="fas fa-times"></i></button>
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className="cal-events">
+                {events.map(e => (
+                    <div key={e.id} className="event-item">
+                        <div className="event-time">{e.waktu}</div>
+                        <div className="event-desc">{e.keterangan}</div>
+                        <button className="event-del" onClick={() => deleteEvent(e.id)}><i className="fas fa-times"></i></button>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

@@ -49,6 +49,7 @@ namespace SiBMN.Data
         public DbSet<PenerimaanBarang> PenerimaanBarangs { get; set; }
         public DbSet<MutasiAset> MutasiAsets { get; set; }
         public DbSet<KodeBarang> KodeBarangs { get; set; }
+        public DbSet<JadwalEvent> JadwalEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
