@@ -1782,6 +1782,10 @@ namespace SiBMN.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_pengajuan");
 
+                    b.Property<int?>("ApprovedBy")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("approved_by");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("created_at");
@@ -1812,6 +1816,10 @@ namespace SiBMN.Migrations
                     b.Property<int?>("NomorSurat")
                         .HasColumnType("INTEGER")
                         .HasColumnName("nomor_surat");
+
+                    b.Property<int?>("ReviewedBy")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("reviewed_by");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1845,11 +1853,97 @@ namespace SiBMN.Migrations
 
                     b.HasKey("IdPengajuan");
 
+                    b.HasIndex("ApprovedBy");
+
                     b.HasIndex("IdPejabat");
+
+                    b.HasIndex("ReviewedBy");
 
                     b.HasIndex("UnitId");
 
                     b.ToTable("Pengajuan");
+
+                    b.HasData(
+                        new
+                        {
+                            IdPengajuan = 1,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 45000000m,
+                            UnitId = 1
+                        },
+                        new
+                        {
+                            IdPengajuan = 2,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 32000000m,
+                            UnitId = 1
+                        },
+                        new
+                        {
+                            IdPengajuan = 3,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 28000000m,
+                            UnitId = 2
+                        },
+                        new
+                        {
+                            IdPengajuan = 4,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 15500000m,
+                            UnitId = 2
+                        },
+                        new
+                        {
+                            IdPengajuan = 5,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 52000000m,
+                            UnitId = 3
+                        },
+                        new
+                        {
+                            IdPengajuan = 6,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 19000000m,
+                            UnitId = 5
+                        },
+                        new
+                        {
+                            IdPengajuan = 7,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 8500000m,
+                            UnitId = 5
+                        },
+                        new
+                        {
+                            IdPengajuan = 8,
+                            JenisPengajuan = "Belanja Modal",
+                            Status = "draft",
+                            TahunAnggaran = 2025,
+                            TanggalPengajuan = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TotalHarga = 37500000m,
+                            UnitId = 6
+                        });
                 });
 
             modelBuilder.Entity("SiBMN.Models.Role", b =>
@@ -1901,6 +1995,11 @@ namespace SiBMN.Migrations
                         {
                             IdRole = 4,
                             NamaRole = "Tim Kerja BMN"
+                        },
+                        new
+                        {
+                            IdRole = 5,
+                            NamaRole = "Pimpinan BMN"
                         });
                 });
 
@@ -2091,17 +2190,17 @@ namespace SiBMN.Migrations
                         new
                         {
                             IdUnit = 1,
-                            NamaUnit = "Fakultas Teknik"
+                            NamaUnit = "UPA TIK"
                         },
                         new
                         {
                             IdUnit = 2,
-                            NamaUnit = "Fakultas Ekonomi"
+                            NamaUnit = "UPA Bahasa"
                         },
                         new
                         {
                             IdUnit = 3,
-                            NamaUnit = "Fakultas Hukum"
+                            NamaUnit = "UPA Perpustakaan"
                         },
                         new
                         {
@@ -2111,7 +2210,12 @@ namespace SiBMN.Migrations
                         new
                         {
                             IdUnit = 5,
-                            NamaUnit = "UPT Perpustakaan"
+                            NamaUnit = "UPA Karier & Kewirausahaan"
+                        },
+                        new
+                        {
+                            IdUnit = 6,
+                            NamaUnit = "UPA Taman Agroteknologi"
                         });
                 });
 
@@ -2172,8 +2276,8 @@ namespace SiBMN.Migrations
                         new
                         {
                             IdUser = 1,
-                            Email = "admin.teknik@univ.ac.id",
-                            Nama = "Admin Teknik",
+                            Email = "admin.upatik@univ.ac.id",
+                            Nama = "Admin UPA TIK",
                             Password = "admin123",
                             RoleId = 1,
                             UnitId = 1
@@ -2181,8 +2285,8 @@ namespace SiBMN.Migrations
                         new
                         {
                             IdUser = 2,
-                            Email = "admin.ekonomi@univ.ac.id",
-                            Nama = "Admin Ekonomi",
+                            Email = "admin.upabahasa@univ.ac.id",
+                            Nama = "Admin UPA Bahasa",
                             Password = "admin123",
                             RoleId = 1,
                             UnitId = 2
@@ -2190,6 +2294,33 @@ namespace SiBMN.Migrations
                         new
                         {
                             IdUser = 3,
+                            Email = "admin.upaperpustakaan@univ.ac.id",
+                            Nama = "Admin UPA Perpustakaan",
+                            Password = "admin123",
+                            RoleId = 1,
+                            UnitId = 3
+                        },
+                        new
+                        {
+                            IdUser = 4,
+                            Email = "admin.upakarier@univ.ac.id",
+                            Nama = "Admin UPA Karier",
+                            Password = "admin123",
+                            RoleId = 1,
+                            UnitId = 5
+                        },
+                        new
+                        {
+                            IdUser = 5,
+                            Email = "admin.upaagrotek@univ.ac.id",
+                            Nama = "Admin UPA Agroteknologi",
+                            Password = "admin123",
+                            RoleId = 1,
+                            UnitId = 6
+                        },
+                        new
+                        {
+                            IdUser = 6,
                             Email = "pengadaan@univ.ac.id",
                             Nama = "Tim Pengadaan",
                             Password = "admin123",
@@ -2198,7 +2329,7 @@ namespace SiBMN.Migrations
                         },
                         new
                         {
-                            IdUser = 4,
+                            IdUser = 7,
                             Email = "budi@univ.ac.id",
                             Nama = "Prof. Dr. Budi Santoso",
                             Password = "admin123",
@@ -2207,7 +2338,7 @@ namespace SiBMN.Migrations
                         },
                         new
                         {
-                            IdUser = 5,
+                            IdUser = 8,
                             Email = "siti@univ.ac.id",
                             Nama = "Dr. Siti Rahayu, M.Sc.",
                             Password = "admin123",
@@ -2216,11 +2347,29 @@ namespace SiBMN.Migrations
                         },
                         new
                         {
-                            IdUser = 6,
+                            IdUser = 9,
                             Email = "bmn@univ.ac.id",
-                            Nama = "Tim BMN",
+                            Nama = "Abel Thareq",
                             Password = "admin123",
                             RoleId = 4,
+                            UnitId = 4
+                        },
+                        new
+                        {
+                            IdUser = 11,
+                            Email = "akmal@univ.ac.id",
+                            Nama = "Akmal Hasan",
+                            Password = "admin123",
+                            RoleId = 4,
+                            UnitId = 4
+                        },
+                        new
+                        {
+                            IdUser = 10,
+                            Email = "kurnadi@univ.ac.id",
+                            Nama = "Kurnadi",
+                            Password = "admin123",
+                            RoleId = 5,
                             UnitId = 4
                         });
                 });
@@ -2325,9 +2474,19 @@ namespace SiBMN.Migrations
 
             modelBuilder.Entity("SiBMN.Models.Pengajuan", b =>
                 {
+                    b.HasOne("SiBMN.Models.User", "Approver")
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SiBMN.Models.User", "Pejabat")
                         .WithMany()
                         .HasForeignKey("IdPejabat")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SiBMN.Models.User", "Reviewer")
+                        .WithMany()
+                        .HasForeignKey("ReviewedBy")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SiBMN.Models.Unit", "Unit")
@@ -2336,7 +2495,11 @@ namespace SiBMN.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Approver");
+
                     b.Navigation("Pejabat");
+
+                    b.Navigation("Reviewer");
 
                     b.Navigation("Unit");
                 });

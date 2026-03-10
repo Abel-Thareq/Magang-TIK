@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { apiGet, apiPost, apiDelete, formatRupiah, formatDate } from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
+import { apiGet, apiPost, apiPatch, apiDelete, formatRupiah, formatDate } from '../../api/api';
 
 export default function PengajuanDetails() {
     const { id } = useParams();
+    const { user } = useAuth();
     const [pengajuan, setPengajuan] = useState(null);
     const [details, setDetails] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,7 +14,10 @@ export default function PengajuanDetails() {
     const loadData = () => {
         setLoading(true);
         apiGet(`/PengajuanApi/${id}`).then(data => {
-            if (data) { setPengajuan(data.pengajuan); setDetails(data.details); }
+            if (data) {
+                setPengajuan(data.pengajuan);
+                setDetails(data.details);
+            }
         }).finally(() => setLoading(false));
     };
 
@@ -22,6 +27,39 @@ export default function PengajuanDetails() {
         if (!confirm('Yakin ingin mengajukan pengajuan ini? Pengajuan yang sudah diajukan tidak dapat diubah.')) return;
         const res = await apiPost(`/PengajuanApi/${id}/submit`);
         if (res) { setMsg(res.message); loadData(); }
+    };
+
+    // Reviewer marks review as complete → status "Reviewed"
+    const handleFinishReview = async () => {
+        if (!confirm('Tandai review selesai?')) return;
+        const res = await apiPatch(`/PengajuanApi/${id}/status`, {
+            status: 'Reviewed',
+            userId: user.userId,
+            roleId: user.roleId
+        });
+        if (res) { setMsg(res.message || 'Review selesai'); loadData(); }
+    };
+
+    // Pimpinan BMN approve
+    const handleApprove = async () => {
+        if (!confirm('Yakin ingin menyetujui pengajuan ini?')) return;
+        const res = await apiPatch(`/PengajuanApi/${id}/status`, {
+            status: 'Approve',
+            userId: user.userId,
+            roleId: user.roleId
+        });
+        if (res) { setMsg(res.message || 'Pengajuan disetujui'); loadData(); }
+    };
+
+    // Pimpinan BMN reject → back to Draft
+    const handleReject = async () => {
+        if (!confirm('Yakin ingin menolak pengajuan ini? Status akan kembali ke Draft.')) return;
+        const res = await apiPatch(`/PengajuanApi/${id}/status`, {
+            status: 'Reject',
+            userId: user.userId,
+            roleId: user.roleId
+        });
+        if (res) { setMsg(res.message || 'Pengajuan ditolak'); loadData(); }
     };
 
     const handleDeleteDetail = async (detailId) => {
@@ -37,6 +75,19 @@ export default function PengajuanDetails() {
 
     if (loading) return <div className="text-center py-5"><i className="fas fa-spinner fa-spin fa-2x"></i></div>;
     if (!pengajuan) return <div className="text-center py-5">Data tidak ditemukan</div>;
+
+    const statusLower = (pengajuan.status || '').toLowerCase();
+    const isTimBmn = user?.roleId === 4;
+    const isPimpinanBmn = user?.roleId === 5;
+    const isReviewer = isTimBmn && pengajuan.reviewedById === user?.userId;
+    const isAdminUnit = user?.roleId === 1;
+
+    // Editable only for admin unit kerja when status is draft
+    const canEdit = isAdminUnit && statusLower === 'draft';
+
+    // Tim BMN (non-reviewer) can preview in "Reviewed" status but can't edit
+    // Pimpinan BMN can always view details
+    const isPreviewOnly = (isTimBmn && !isReviewer) || isPimpinanBmn;
 
     return (
         <div className="fade-in">
@@ -54,9 +105,32 @@ export default function PengajuanDetails() {
                         <h2><i className="fas fa-file-invoice me-2"></i>Pengajuan Barang Modal</h2>
                         <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>
                             ID: #{pengajuan.idPengajuan} |{' '}
-                            {pengajuan.status === 'draft' && <span className="badge bg-warning text-dark">Draft</span>}
-                            {pengajuan.status === 'approved' && <span className="badge bg-success">Diajukan</span>}
+                            {statusLower === 'draft' && <span className="badge bg-warning text-dark">Draft</span>}
+                            {statusLower === 'approved' && <span className="badge bg-success">Diajukan</span>}
+                            {statusLower === 'review' && (
+                                <span className="badge" style={{backgroundColor: '#17a2b8', color: 'white'}}
+                                    title={`Direview oleh: ${pengajuan.reviewedByName || ''}`}>
+                                    Review
+                                </span>
+                            )}
+                            {statusLower === 'reviewed' && (
+                                <span className="badge" style={{backgroundColor: '#6f42c1', color: 'white'}}
+                                    title={`Direview oleh: ${pengajuan.reviewedByName || ''}`}>
+                                    Reviewed
+                                </span>
+                            )}
+                            {statusLower === 'approve' && (
+                                <span className="badge" style={{backgroundColor: '#28a745', color: 'white'}}
+                                    title={`Disetujui oleh: ${pengajuan.approvedByName || ''}`}>
+                                    Approve
+                                </span>
+                            )}
                         </span>
+                        {statusLower === 'review' && pengajuan.reviewedByName && (
+                            <div style={{ fontSize: '0.8rem', marginTop: 4, color: '#17a2b8' }}>
+                                <i className="fas fa-user-check me-1"></i>Sedang direview oleh: <strong>{pengajuan.reviewedByName}</strong>
+                            </div>
+                        )}
                     </div>
                     <Link to="/pengajuan" className="btn btn-sm btn-outline-light">
                         <i className="fas fa-arrow-left me-1"></i> Kembali
@@ -82,7 +156,7 @@ export default function PengajuanDetails() {
                     <div className="info-item"><label>Pejabat Penandatangan</label><span>{pengajuan.pejabatName || '-'}</span></div>
                     <div className="info-item"><label>Jenis Pengajuan</label><span>{pengajuan.jenisPengajuan || 'Belanja Modal'}</span></div>
                 </div>
-                {pengajuan.status === 'draft' && (
+                {canEdit && (
                     <div className="mt-3">
                         <Link to={`/pengajuan/edit/${pengajuan.idPengajuan}`} className="btn-sm-action btn-edit">
                             <i className="fas fa-pencil"></i> Edit Data Surat
@@ -95,7 +169,7 @@ export default function PengajuanDetails() {
             <div className="table-container">
                 <div className="table-header">
                     <div className="table-title"><i className="fas fa-boxes-stacked me-2"></i>Daftar Barang Modal</div>
-                    {pengajuan.status === 'draft' && (
+                    {canEdit && (
                         <Link to={`/detailpengajuan/create/${pengajuan.idPengajuan}`} className="btn-primary-custom" style={{ fontSize: '0.8rem' }}>
                             <i className="fas fa-plus"></i> Tambah Barang
                         </Link>
@@ -110,7 +184,7 @@ export default function PengajuanDetails() {
                                     <th style={{ width: 50 }}>No</th><th>Nama Barang</th><th>Spesifikasi</th>
                                     <th>Volume</th><th>Satuan</th><th>Harga Satuan</th><th>Jumlah Harga</th>
                                     <th>Lokasi</th><th>Asal</th>
-                                    {pengajuan.status === 'draft' && <th style={{ width: 130 }}>Aksi</th>}
+                                    {canEdit && <th style={{ width: 130 }}>Aksi</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -127,7 +201,7 @@ export default function PengajuanDetails() {
                                         <td>
                                             {item.asalBarang === 'Import' ? <span className="badge bg-info">Import</span> : <span className="badge bg-success">PDN</span>}
                                         </td>
-                                        {pengajuan.status === 'draft' && (
+                                        {canEdit && (
                                             <td>
                                                 <div className="d-flex gap-1 flex-wrap">
                                                     <button className="btn-sm-action btn-move" title="Naikkan Prioritas" onClick={() => handleMove(item.idDetPengajuan, 'moveup')}><i className="fas fa-arrow-up"></i></button>
@@ -144,7 +218,7 @@ export default function PengajuanDetails() {
                                 <tr className="total-row">
                                     <td colSpan="6" style={{ textAlign: 'right', fontSize: '1rem' }}><strong>TOTAL</strong></td>
                                     <td className="currency" style={{ fontSize: '1.05rem' }}>{formatRupiah(pengajuan.totalHarga)}</td>
-                                    <td colSpan={pengajuan.status === 'draft' ? 3 : 2}></td>
+                                    <td colSpan={canEdit ? 3 : 2}></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -154,18 +228,42 @@ export default function PengajuanDetails() {
                         <i className="fas fa-box-open"></i>
                         <h3>Belum Ada Barang</h3>
                         <p>Belum ada barang yang ditambahkan ke pengajuan ini.</p>
-                        <Link to={`/detailpengajuan/create/${pengajuan.idPengajuan}`} className="btn-primary-custom">
-                            <i className="fas fa-plus-circle"></i> Tambah Barang Pertama
-                        </Link>
+                        {canEdit && (
+                            <Link to={`/detailpengajuan/create/${pengajuan.idPengajuan}`} className="btn-primary-custom">
+                                <i className="fas fa-plus-circle"></i> Tambah Barang Pertama
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>
 
             {/* Action Buttons */}
-            {pengajuan.status === 'draft' && details.length > 0 && (
+            {/* Admin Unit Kerja: submit draft */}
+            {canEdit && details.length > 0 && (
                 <div className="d-flex gap-3 mt-4">
                     <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem' }} onClick={handleSubmit}>
                         <i className="fas fa-paper-plane"></i> Ajukan Pengajuan
+                    </button>
+                </div>
+            )}
+
+            {/* Tim BMN (reviewer): finish review button */}
+            {isReviewer && statusLower === 'review' && (
+                <div className="d-flex gap-3 mt-4">
+                    <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem', backgroundColor: '#6f42c1', borderColor: '#6f42c1' }} onClick={handleFinishReview}>
+                        <i className="fas fa-check-double"></i> Selesai Review
+                    </button>
+                </div>
+            )}
+
+            {/* Pimpinan BMN: approve or reject */}
+            {isPimpinanBmn && statusLower === 'reviewed' && (
+                <div className="d-flex gap-3 mt-4">
+                    <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem', backgroundColor: '#28a745', borderColor: '#28a745' }} onClick={handleApprove}>
+                        <i className="fas fa-check-circle"></i> Setujui Pengajuan
+                    </button>
+                    <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem', backgroundColor: '#dc3545', borderColor: '#dc3545' }} onClick={handleReject}>
+                        <i className="fas fa-times-circle"></i> Tolak Pengajuan
                     </button>
                 </div>
             )}

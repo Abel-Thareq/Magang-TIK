@@ -53,6 +53,16 @@ export async function apiDelete(url) {
     return res.json();
 }
 
+export async function apiPatch(url, data) {
+    const res = await apiFetch(url, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+    });
+    if (!res) return null;
+    return res.json();
+}
+
+
 export function formatRupiah(angka) {
     const num = Number(angka) || 0;
     return 'Rp ' + num.toLocaleString('id-ID');

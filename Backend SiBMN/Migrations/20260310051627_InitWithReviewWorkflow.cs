@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SiBMN.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class InitWithReviewWorkflow : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -225,6 +225,31 @@ namespace SiBMN.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "JadwalEvents",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    user_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    bulan = table.Column<string>(type: "TEXT", maxLength: 7, nullable: false),
+                    waktu = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    keterangan = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    created_at = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    updated_at = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    deleted_at = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JadwalEvents", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_JadwalEvents_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "id_user",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Pengajuan",
                 columns: table => new
                 {
@@ -243,7 +268,9 @@ namespace SiBMN.Migrations
                     tahun_anggaran = table.Column<int>(type: "INTEGER", nullable: true),
                     created_at = table.Column<DateTime>(type: "TEXT", nullable: true),
                     updated_at = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    deleted_at = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    deleted_at = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    reviewed_by = table.Column<int>(type: "INTEGER", nullable: true),
+                    approved_by = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -255,8 +282,20 @@ namespace SiBMN.Migrations
                         principalColumn: "id_unit",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Pengajuan_Users_approved_by",
+                        column: x => x.approved_by,
+                        principalTable: "Users",
+                        principalColumn: "id_user",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Pengajuan_Users_id_pejabat",
                         column: x => x.id_pejabat,
+                        principalTable: "Users",
+                        principalColumn: "id_user",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Pengajuan_Users_reviewed_by",
+                        column: x => x.reviewed_by,
                         principalTable: "Users",
                         principalColumn: "id_user",
                         onDelete: ReferentialAction.Restrict);
@@ -510,7 +549,8 @@ namespace SiBMN.Migrations
                     { 1, null, null, "Admin Unit Kerja", null },
                     { 2, null, null, "Tim Pengadaan", null },
                     { 3, null, null, "Admin Pusat", null },
-                    { 4, null, null, "Tim Kerja BMN", null }
+                    { 4, null, null, "Tim Kerja BMN", null },
+                    { 5, null, null, "Pimpinan BMN", null }
                 });
 
             migrationBuilder.InsertData(
@@ -518,11 +558,12 @@ namespace SiBMN.Migrations
                 columns: new[] { "id_unit", "created_at", "deleted_at", "nama_unit", "updated_at" },
                 values: new object[,]
                 {
-                    { 1, null, null, "Fakultas Teknik", null },
-                    { 2, null, null, "Fakultas Ekonomi", null },
-                    { 3, null, null, "Fakultas Hukum", null },
+                    { 1, null, null, "UPA TIK", null },
+                    { 2, null, null, "UPA Bahasa", null },
+                    { 3, null, null, "UPA Perpustakaan", null },
                     { 4, null, null, "Rektorat", null },
-                    { 5, null, null, "UPT Perpustakaan", null }
+                    { 5, null, null, "UPA Karier & Kewirausahaan", null },
+                    { 6, null, null, "UPA Taman Agroteknologi", null }
                 });
 
             migrationBuilder.InsertData(
@@ -548,6 +589,21 @@ namespace SiBMN.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Pengajuan",
+                columns: new[] { "id_pengajuan", "approved_by", "created_at", "deleted_at", "id_pejabat", "jabatan", "jenis_pengajuan", "no_surat_rektor", "nomor_surat", "reviewed_by", "status", "tahun_anggaran", "tanggal_pengajuan", "tgl_surat_rektor", "total_harga", "unit_id", "updated_at" },
+                values: new object[,]
+                {
+                    { 1, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 45000000m, 1, null },
+                    { 2, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 32000000m, 1, null },
+                    { 3, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 28000000m, 2, null },
+                    { 4, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 15500000m, 2, null },
+                    { 5, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 23, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 52000000m, 3, null },
+                    { 6, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 24, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 19000000m, 5, null },
+                    { 7, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 8500000m, 5, null },
+                    { 8, null, null, null, null, null, "Belanja Modal", null, null, null, "draft", 2025, new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 37500000m, 6, null }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Ruang_Gedung",
                 columns: new[] { "id_ruang", "created_at", "deleted_at", "id_unit", "nama_gedung", "nama_ruang", "updated_at" },
                 values: new object[,]
@@ -569,12 +625,17 @@ namespace SiBMN.Migrations
                 columns: new[] { "id_user", "created_at", "deleted_at", "email", "nama", "password", "role_id", "unit_id", "updated_at" },
                 values: new object[,]
                 {
-                    { 1, null, null, "admin.teknik@univ.ac.id", "Admin Teknik", "admin123", 1, 1, null },
-                    { 2, null, null, "admin.ekonomi@univ.ac.id", "Admin Ekonomi", "admin123", 1, 2, null },
-                    { 3, null, null, "pengadaan@univ.ac.id", "Tim Pengadaan", "admin123", 2, 4, null },
-                    { 4, null, null, "budi@univ.ac.id", "Prof. Dr. Budi Santoso", "admin123", 3, 4, null },
-                    { 5, null, null, "siti@univ.ac.id", "Dr. Siti Rahayu, M.Sc.", "admin123", 3, 4, null },
-                    { 6, null, null, "bmn@univ.ac.id", "Tim BMN", "admin123", 4, 4, null }
+                    { 1, null, null, "admin.upatik@univ.ac.id", "Admin UPA TIK", "admin123", 1, 1, null },
+                    { 2, null, null, "admin.upabahasa@univ.ac.id", "Admin UPA Bahasa", "admin123", 1, 2, null },
+                    { 3, null, null, "admin.upaperpustakaan@univ.ac.id", "Admin UPA Perpustakaan", "admin123", 1, 3, null },
+                    { 4, null, null, "admin.upakarier@univ.ac.id", "Admin UPA Karier", "admin123", 1, 5, null },
+                    { 5, null, null, "admin.upaagrotek@univ.ac.id", "Admin UPA Agroteknologi", "admin123", 1, 6, null },
+                    { 6, null, null, "pengadaan@univ.ac.id", "Tim Pengadaan", "admin123", 2, 4, null },
+                    { 7, null, null, "budi@univ.ac.id", "Prof. Dr. Budi Santoso", "admin123", 3, 4, null },
+                    { 8, null, null, "siti@univ.ac.id", "Dr. Siti Rahayu, M.Sc.", "admin123", 3, 4, null },
+                    { 9, null, null, "bmn@univ.ac.id", "Abel Thareq", "admin123", 4, 4, null },
+                    { 10, null, null, "kurnadi@univ.ac.id", "Kurnadi", "admin123", 5, 4, null },
+                    { 11, null, null, "akmal@univ.ac.id", "Akmal Hasan", "admin123", 4, 4, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -603,6 +664,11 @@ namespace SiBMN.Migrations
                 column: "id_ruang");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JadwalEvents_user_id",
+                table: "JadwalEvents",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Kode_Barang_kode_golongan_kode_bidang_kode_kelompok_kode_sub_kelompok_kode_barang_value",
                 table: "Kode_Barang",
                 columns: new[] { "kode_golongan", "kode_bidang", "kode_kelompok", "kode_sub_kelompok", "kode_barang_value" },
@@ -629,9 +695,19 @@ namespace SiBMN.Migrations
                 column: "id_pengajuan");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Pengajuan_approved_by",
+                table: "Pengajuan",
+                column: "approved_by");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Pengajuan_id_pejabat",
                 table: "Pengajuan",
                 column: "id_pejabat");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pengajuan_reviewed_by",
+                table: "Pengajuan",
+                column: "reviewed_by");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pengajuan_unit_id",
@@ -669,6 +745,9 @@ namespace SiBMN.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Detail_Pengajuan");
+
+            migrationBuilder.DropTable(
+                name: "JadwalEvents");
 
             migrationBuilder.DropTable(
                 name: "Mutasi_Aset");

@@ -80,6 +80,18 @@ namespace SiBMN.Data
                 .HasForeignKey(p => p.IdPejabat)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.Reviewer)
+                .WithMany()
+                .HasForeignKey(p => p.ReviewedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.Approver)
+                .WithMany()
+                .HasForeignKey(p => p.ApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<DetailPengajuan>()
                 .HasOne(d => d.Pengajuan)
                 .WithMany(p => p.DetailPengajuans)
@@ -168,26 +180,55 @@ namespace SiBMN.Data
                 new Role { IdRole = 1, NamaRole = "Admin Unit Kerja" },
                 new Role { IdRole = 2, NamaRole = "Tim Pengadaan" },
                 new Role { IdRole = 3, NamaRole = "Admin Pusat" },
-                new Role { IdRole = 4, NamaRole = "Tim Kerja BMN" }
+                new Role { IdRole = 4, NamaRole = "Tim Kerja BMN" },
+                new Role { IdRole = 5, NamaRole = "Pimpinan BMN" }
             );
 
-            // Units
+            // Units (UPA = Unit Pelaksana)
             modelBuilder.Entity<Unit>().HasData(
-                new Unit { IdUnit = 1, NamaUnit = "Fakultas Teknik" },
-                new Unit { IdUnit = 2, NamaUnit = "Fakultas Ekonomi" },
-                new Unit { IdUnit = 3, NamaUnit = "Fakultas Hukum" },
+                new Unit { IdUnit = 1, NamaUnit = "UPA TIK" },
+                new Unit { IdUnit = 2, NamaUnit = "UPA Bahasa" },
+                new Unit { IdUnit = 3, NamaUnit = "UPA Perpustakaan" },
                 new Unit { IdUnit = 4, NamaUnit = "Rektorat" },
-                new Unit { IdUnit = 5, NamaUnit = "UPT Perpustakaan" }
+                new Unit { IdUnit = 5, NamaUnit = "UPA Karier & Kewirausahaan" },
+                new Unit { IdUnit = 6, NamaUnit = "UPA Taman Agroteknologi" }
             );
 
             // Users
             modelBuilder.Entity<User>().HasData(
-                new User { IdUser = 1, Nama = "Admin Teknik", Email = "admin.teknik@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 1 },
-                new User { IdUser = 2, Nama = "Admin Ekonomi", Email = "admin.ekonomi@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 2 },
-                new User { IdUser = 3, Nama = "Tim Pengadaan", Email = "pengadaan@univ.ac.id", Password = "admin123", RoleId = 2, UnitId = 4 },
-                new User { IdUser = 4, Nama = "Prof. Dr. Budi Santoso", Email = "budi@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
-                new User { IdUser = 5, Nama = "Dr. Siti Rahayu, M.Sc.", Email = "siti@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
-                new User { IdUser = 6, Nama = "Tim BMN", Email = "bmn@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 }
+                // Admin Unit Kerja (Role 1)
+                new User { IdUser = 1, Nama = "Admin UPA TIK", Email = "admin.upatik@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 1 },
+                new User { IdUser = 2, Nama = "Admin UPA Bahasa", Email = "admin.upabahasa@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 2 },
+                new User { IdUser = 3, Nama = "Admin UPA Perpustakaan", Email = "admin.upaperpustakaan@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 3 },
+                new User { IdUser = 4, Nama = "Admin UPA Karier", Email = "admin.upakarier@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 5 },
+                new User { IdUser = 5, Nama = "Admin UPA Agroteknologi", Email = "admin.upaagrotek@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 6 },
+                // Tim Pengadaan (Role 2)
+                new User { IdUser = 6, Nama = "Tim Pengadaan", Email = "pengadaan@univ.ac.id", Password = "admin123", RoleId = 2, UnitId = 4 },
+                // Admin Pusat / Pejabat (Role 3)
+                new User { IdUser = 7, Nama = "Prof. Dr. Budi Santoso", Email = "budi@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
+                new User { IdUser = 8, Nama = "Dr. Siti Rahayu, M.Sc.", Email = "siti@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
+                // Tim Kerja BMN (Role 4)
+                new User { IdUser = 9, Nama = "Abel Thareq", Email = "bmn@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
+                new User { IdUser = 11, Nama = "Akmal Hasan", Email = "akmal@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
+                // Pimpinan BMN (Role 5)
+                new User { IdUser = 10, Nama = "Kurnadi", Email = "kurnadi@univ.ac.id", Password = "admin123", RoleId = 5, UnitId = 4 }
+            );
+
+            // Mock Pengajuan data for each UPA
+            modelBuilder.Entity<Pengajuan>().HasData(
+                // UPA TIK
+                new Pengajuan { IdPengajuan = 1, TanggalPengajuan = new DateTime(2025, 2, 19), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 45000000, UnitId = 1, TahunAnggaran = 2025 },
+                new Pengajuan { IdPengajuan = 2, TanggalPengajuan = new DateTime(2025, 2, 20), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 32000000, UnitId = 1, TahunAnggaran = 2025 },
+                // UPA Bahasa
+                new Pengajuan { IdPengajuan = 3, TanggalPengajuan = new DateTime(2025, 2, 21), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 28000000, UnitId = 2, TahunAnggaran = 2025 },
+                new Pengajuan { IdPengajuan = 4, TanggalPengajuan = new DateTime(2025, 2, 22), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 15500000, UnitId = 2, TahunAnggaran = 2025 },
+                // UPA Perpustakaan
+                new Pengajuan { IdPengajuan = 5, TanggalPengajuan = new DateTime(2025, 2, 23), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 52000000, UnitId = 3, TahunAnggaran = 2025 },
+                // UPA Karier & Kewirausahaan
+                new Pengajuan { IdPengajuan = 6, TanggalPengajuan = new DateTime(2025, 2, 24), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 19000000, UnitId = 5, TahunAnggaran = 2025 },
+                new Pengajuan { IdPengajuan = 7, TanggalPengajuan = new DateTime(2025, 2, 25), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 8500000, UnitId = 5, TahunAnggaran = 2025 },
+                // UPA Taman Agroteknologi
+                new Pengajuan { IdPengajuan = 8, TanggalPengajuan = new DateTime(2025, 2, 26), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 37500000, UnitId = 6, TahunAnggaran = 2025 }
             );
 
             // Kategori Barang

@@ -32,11 +32,13 @@ export default function Layout() {
                             <i className="fas fa-list-alt"></i> Daftar Pengajuan
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink to="/pengajuan/create" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
-                            <i className="fas fa-file-medical"></i> Buat Pengajuan
-                        </NavLink>
-                    </li>
+                    {user?.roleId === 1 && (
+                        <li>
+                            <NavLink to="/pengajuan/create" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+                                <i className="fas fa-file-medical"></i> Buat Pengajuan
+                            </NavLink>
+                        </li>
+                    )}
                     {user?.roleId === 4 && (
                         <li>
                             <NavLink to="/kodebarang" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>

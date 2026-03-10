@@ -58,12 +58,24 @@ namespace SiBMN.Models
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
+        [Column("reviewed_by")]
+        public int? ReviewedBy { get; set; }
+
+        [Column("approved_by")]
+        public int? ApprovedBy { get; set; }
+
         // Navigation
         [ForeignKey("UnitId")]
         public Unit? Unit { get; set; }
 
         [ForeignKey("IdPejabat")]
         public User? Pejabat { get; set; }
+
+        [ForeignKey("ReviewedBy")]
+        public User? Reviewer { get; set; }
+
+        [ForeignKey("ApprovedBy")]
+        public User? Approver { get; set; }
 
         public ICollection<DetailPengajuan> DetailPengajuans { get; set; } = new List<DetailPengajuan>();
         public ICollection<PenerimaanBarang> PenerimaanBarangs { get; set; } = new List<PenerimaanBarang>();
