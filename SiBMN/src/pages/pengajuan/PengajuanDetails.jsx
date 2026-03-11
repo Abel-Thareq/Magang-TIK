@@ -62,6 +62,13 @@ export default function PengajuanDetails() {
         if (res) { setMsg(res.message || 'Pengajuan ditolak'); loadData(); }
     };
 
+    // Reviewer: toggle exclude (soft-mark)
+    const handleToggleExclude = async (detailId) => {
+        const res = await apiPatch(`/DetailPengajuanApi/${detailId}/toggle-exclude`);
+        if (res) { loadData(); }
+    };
+
+    // Admin or reviewer: real delete
     const handleDeleteDetail = async (detailId) => {
         if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
         const res = await apiDelete(`/DetailPengajuanApi/${detailId}`);
@@ -82,12 +89,12 @@ export default function PengajuanDetails() {
     const isReviewer = isTimBmn && pengajuan.reviewedById === user?.userId;
     const isAdminUnit = user?.roleId === 1;
 
-    // Editable only for admin unit kerja when status is draft
-    const canEdit = isAdminUnit && statusLower === 'draft';
-
-    // Tim BMN (non-reviewer) can preview in "Reviewed" status but can't edit
-    // Pimpinan BMN can always view details
-    const isPreviewOnly = (isTimBmn && !isReviewer) || isPimpinanBmn;
+    // Admin can edit during draft
+    const canAdminEdit = isAdminUnit && statusLower === 'draft';
+    // Reviewer can edit during review
+    const canReviewerEdit = isReviewer && statusLower === 'review';
+    // Anyone who can edit
+    const canEdit = canAdminEdit || canReviewerEdit;
 
     return (
         <div className="fade-in">
@@ -156,7 +163,7 @@ export default function PengajuanDetails() {
                     <div className="info-item"><label>Pejabat Penandatangan</label><span>{pengajuan.pejabatName || '-'}</span></div>
                     <div className="info-item"><label>Jenis Pengajuan</label><span>{pengajuan.jenisPengajuan || 'Belanja Modal'}</span></div>
                 </div>
-                {canEdit && (
+                {canAdminEdit && (
                     <div className="mt-3">
                         <Link to={`/pengajuan/edit/${pengajuan.idPengajuan}`} className="btn-sm-action btn-edit">
                             <i className="fas fa-pencil"></i> Edit Data Surat
@@ -169,7 +176,7 @@ export default function PengajuanDetails() {
             <div className="table-container">
                 <div className="table-header">
                     <div className="table-title"><i className="fas fa-boxes-stacked me-2"></i>Daftar Barang Modal</div>
-                    {canEdit && (
+                    {canAdminEdit && (
                         <Link to={`/detailpengajuan/create/${pengajuan.idPengajuan}`} className="btn-primary-custom" style={{ fontSize: '0.8rem' }}>
                             <i className="fas fa-plus"></i> Tambah Barang
                         </Link>
@@ -184,35 +191,60 @@ export default function PengajuanDetails() {
                                     <th style={{ width: 50 }}>No</th><th>Nama Barang</th><th>Spesifikasi</th>
                                     <th>Volume</th><th>Satuan</th><th>Harga Satuan</th><th>Jumlah Harga</th>
                                     <th>Lokasi</th><th>Asal</th>
-                                    {canEdit && <th style={{ width: 130 }}>Aksi</th>}
+                                    {canEdit && <th style={{ width: 150 }}>Aksi</th>}
                                 </tr>
                             </thead>
                             <tbody>
-                                {details.map(item => (
-                                    <tr key={item.idDetPengajuan}>
-                                        <td><span className="badge bg-secondary">{item.noPrioritas}</span></td>
-                                        <td><strong>{item.barangNama}</strong><br /><small className="text-muted">{item.barangKode}</small></td>
-                                        <td style={{ maxWidth: 200, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{item.spesifikasi || '-'}</td>
-                                        <td>{item.jumlahDiminta}</td>
-                                        <td>Unit</td>
-                                        <td className="currency">{formatRupiah(item.hargaSatuan)}</td>
-                                        <td className="currency" style={{ color: 'var(--primary)', fontWeight: 700 }}>{formatRupiah(item.jumlahHarga)}</td>
-                                        <td style={{ fontSize: '0.82rem' }}>{item.gedungNama}<br /><small className="text-muted">{item.ruangNama}</small></td>
-                                        <td>
-                                            {item.asalBarang === 'Import' ? <span className="badge bg-info">Import</span> : <span className="badge bg-success">PDN</span>}
-                                        </td>
-                                        {canEdit && (
+                                {details.map(item => {
+                                    const excluded = item.isExcluded;
+                                    const rowStyle = excluded
+                                        ? { opacity: 0.4, backgroundColor: '#f0f0f0', textDecoration: 'line-through', color: '#999' }
+                                        : {};
+
+                                    return (
+                                        <tr key={item.idDetPengajuan} style={rowStyle}>
+                                            <td><span className="badge bg-secondary">{item.noPrioritas}</span></td>
+                                            <td><strong>{item.barangNama}</strong><br /><small className="text-muted">{item.barangKode}</small></td>
+                                            <td style={{ maxWidth: 200, fontSize: '0.82rem', color: excluded ? '#999' : 'var(--text-secondary)' }}>{item.spesifikasi || '-'}</td>
+                                            <td>{item.jumlahDiminta}</td>
+                                            <td>Unit</td>
+                                            <td className="currency">{formatRupiah(item.hargaSatuan)}</td>
+                                            <td className="currency" style={{ color: excluded ? '#999' : 'var(--primary)', fontWeight: 700 }}>{formatRupiah(item.jumlahHarga)}</td>
+                                            <td style={{ fontSize: '0.82rem' }}>{item.gedungNama}<br /><small className="text-muted">{item.ruangNama}</small></td>
                                             <td>
-                                                <div className="d-flex gap-1 flex-wrap">
-                                                    <button className="btn-sm-action btn-move" title="Naikkan Prioritas" onClick={() => handleMove(item.idDetPengajuan, 'moveup')}><i className="fas fa-arrow-up"></i></button>
-                                                    <button className="btn-sm-action btn-move" title="Turunkan Prioritas" onClick={() => handleMove(item.idDetPengajuan, 'movedown')}><i className="fas fa-arrow-down"></i></button>
-                                                    <Link to={`/detailpengajuan/edit/${item.idDetPengajuan}`} className="btn-sm-action btn-edit" title="Edit"><i className="fas fa-pencil"></i></Link>
-                                                    <button className="btn-sm-action btn-delete" title="Hapus" onClick={() => handleDeleteDetail(item.idDetPengajuan)}><i className="fas fa-trash"></i></button>
-                                                </div>
+                                                {item.asalBarang === 'Import' ? <span className="badge bg-info">Import</span> : <span className="badge bg-success">PDN</span>}
                                             </td>
-                                        )}
-                                    </tr>
-                                ))}
+                                            {canEdit && (
+                                                <td>
+                                                    <div className="d-flex gap-1 flex-wrap">
+                                                        {/* Reorder buttons */}
+                                                        <button className="btn-sm-action btn-move" title="Naikkan Prioritas" onClick={() => handleMove(item.idDetPengajuan, 'moveup')}><i className="fas fa-arrow-up"></i></button>
+                                                        <button className="btn-sm-action btn-move" title="Turunkan Prioritas" onClick={() => handleMove(item.idDetPengajuan, 'movedown')}><i className="fas fa-arrow-down"></i></button>
+
+                                                        {/* Admin: edit & real delete */}
+                                                        {canAdminEdit && (
+                                                            <>
+                                                                <Link to={`/detailpengajuan/edit/${item.idDetPengajuan}`} className="btn-sm-action btn-edit" title="Edit"><i className="fas fa-pencil"></i></Link>
+                                                                <button className="btn-sm-action btn-delete" title="Hapus" onClick={() => handleDeleteDetail(item.idDetPengajuan)}><i className="fas fa-trash"></i></button>
+                                                            </>
+                                                        )}
+
+                                                        {/* Reviewer: toggle exclude (soft-mark) */}
+                                                        {canReviewerEdit && (
+                                                            <button
+                                                                className={`btn-sm-action ${excluded ? 'btn-edit' : 'btn-delete'}`}
+                                                                title={excluded ? 'Kembalikan barang' : 'Tandai tidak diperlukan'}
+                                                                onClick={() => handleToggleExclude(item.idDetPengajuan)}
+                                                                style={excluded ? { backgroundColor: '#28a745', borderColor: '#28a745', color: '#fff' } : {}}>
+                                                                <i className={`fas ${excluded ? 'fa-undo' : 'fa-ban'}`}></i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                             <tfoot>
                                 <tr className="total-row">
@@ -228,7 +260,7 @@ export default function PengajuanDetails() {
                         <i className="fas fa-box-open"></i>
                         <h3>Belum Ada Barang</h3>
                         <p>Belum ada barang yang ditambahkan ke pengajuan ini.</p>
-                        {canEdit && (
+                        {canAdminEdit && (
                             <Link to={`/detailpengajuan/create/${pengajuan.idPengajuan}`} className="btn-primary-custom">
                                 <i className="fas fa-plus-circle"></i> Tambah Barang Pertama
                             </Link>
@@ -239,7 +271,7 @@ export default function PengajuanDetails() {
 
             {/* Action Buttons */}
             {/* Admin Unit Kerja: submit draft */}
-            {canEdit && details.length > 0 && (
+            {canAdminEdit && details.length > 0 && (
                 <div className="d-flex gap-3 mt-4">
                     <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem' }} onClick={handleSubmit}>
                         <i className="fas fa-paper-plane"></i> Ajukan Pengajuan
@@ -247,7 +279,7 @@ export default function PengajuanDetails() {
                 </div>
             )}
 
-            {/* Tim BMN (reviewer): finish review button */}
+            {/* Reviewer: finish review */}
             {isReviewer && statusLower === 'review' && (
                 <div className="d-flex gap-3 mt-4">
                     <button className="btn-primary-custom" style={{ padding: '0.75rem 2rem', backgroundColor: '#6f42c1', borderColor: '#6f42c1' }} onClick={handleFinishReview}>

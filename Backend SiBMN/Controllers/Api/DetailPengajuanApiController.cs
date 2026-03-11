@@ -256,7 +256,7 @@ namespace SiBMN.Controllers.Api
         private async Task UpdateTotalHarga(int pengajuanId)
         {
             var total = await _context.DetailPengajuans
-                .Where(d => d.IdPengajuan == pengajuanId)
+                .Where(d => d.IdPengajuan == pengajuanId && !d.IsExcluded)
                 .SumAsync(d => d.JumlahHarga);
 
             var pengajuan = await _context.Pengajuans.FindAsync(pengajuanId);
@@ -265,6 +265,20 @@ namespace SiBMN.Controllers.Api
                 pengajuan.TotalHarga = total;
                 await _context.SaveChangesAsync();
             }
+        }
+
+        // PATCH: api/detailpengajuanapi/5/toggle-exclude
+        [HttpPatch("{id}/toggle-exclude")]
+        public async Task<IActionResult> ToggleExclude(int id)
+        {
+            var detail = await _context.DetailPengajuans.FindAsync(id);
+            if (detail == null) return NotFound();
+
+            detail.IsExcluded = !detail.IsExcluded;
+            await _context.SaveChangesAsync();
+            await UpdateTotalHarga(detail.IdPengajuan);
+
+            return Ok(new { message = detail.IsExcluded ? "Barang ditandai tidak diperlukan" : "Barang dikembalikan", isExcluded = detail.IsExcluded });
         }
     }
 }

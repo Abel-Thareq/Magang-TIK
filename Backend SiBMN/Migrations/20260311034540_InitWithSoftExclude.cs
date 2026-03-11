@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SiBMN.Migrations
 {
     /// <inheritdoc />
-    public partial class InitWithReviewWorkflow : Migration
+    public partial class InitWithSoftExclude : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -354,6 +354,7 @@ namespace SiBMN.Migrations
                     spesifikasi = table.Column<string>(type: "TEXT", nullable: true),
                     created_at = table.Column<DateTime>(type: "TEXT", nullable: true),
                     updated_at = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    is_excluded = table.Column<bool>(type: "INTEGER", nullable: false),
                     deleted_at = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

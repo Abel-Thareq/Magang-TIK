@@ -65,6 +65,9 @@ namespace SiBMN.Models
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        [Column("is_excluded")]
+        public bool IsExcluded { get; set; } = false;
+
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 

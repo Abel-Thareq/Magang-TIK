@@ -11,8 +11,8 @@ using SiBMN.Data;
 namespace SiBMN.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260310051627_InitWithReviewWorkflow")]
-    partial class InitWithReviewWorkflow
+    [Migration("20260311034540_InitWithSoftExclude")]
+    partial class InitWithSoftExclude
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,10 @@ namespace SiBMN.Migrations
                     b.Property<int>("IdRuang")
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_ruang");
+
+                    b.Property<bool>("IsExcluded")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_excluded");
 
                     b.Property<int>("JumlahDiminta")
                         .HasColumnType("INTEGER")

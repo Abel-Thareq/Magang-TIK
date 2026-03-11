@@ -89,7 +89,8 @@ namespace SiBMN.Controllers.Api
                     d.LinkSurvey,
                     d.LinkGambar,
                     d.IdBarang,
-                    d.IdRuang
+                    d.IdRuang,
+                    d.IsExcluded
                 })
                 .ToListAsync();
 

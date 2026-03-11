@@ -112,6 +112,10 @@ namespace SiBMN.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_ruang");
 
+                    b.Property<bool>("IsExcluded")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_excluded");
+
                     b.Property<int>("JumlahDiminta")
                         .HasColumnType("INTEGER")
                         .HasColumnName("jumlah_diminta");
