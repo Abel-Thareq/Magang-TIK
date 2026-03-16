@@ -36,7 +36,7 @@ namespace SiBMN.Models
 
         [Column("asal_barang")]
         [StringLength(20)]
-        public string AsalBarang { get; set; } = "PDN"; // "Import" or "PDN"
+        public string AsalBarang { get; set; } = "PDN";
 
         [Column("alasan_import")]
         public string? AlasanImport { get; set; }
