@@ -64,6 +64,12 @@ namespace SiBMN.Models
         [Column("approved_by")]
         public int? ApprovedBy { get; set; }
 
+        [Column("reviewed_at")]
+        public DateTime? ReviewedAt { get; set; }
+
+        [Column("approved_at")]
+        public DateTime? ApprovedAt { get; set; }
+
         // Navigation
         [ForeignKey("UnitId")]
         public Unit? Unit { get; set; }

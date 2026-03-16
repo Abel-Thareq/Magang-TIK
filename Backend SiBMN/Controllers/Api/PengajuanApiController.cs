@@ -51,9 +51,9 @@ namespace SiBMN.Controllers.Api
             return Ok(pengajuans);
         }
 
-        // GET: api/pengajuanapi/5
+        // GET: api/pengajuanapi/5?roleId=4
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, [FromQuery] int? roleId)
         {
             var pengajuan = await _context.Pengajuans
                 .Include(p => p.Unit)
@@ -63,6 +63,9 @@ namespace SiBMN.Controllers.Api
                 .FirstOrDefaultAsync(p => p.IdPengajuan == id);
 
             if (pengajuan == null) return NotFound();
+
+            // Only Tim BMN (4) and Pimpinan BMN (5) can see reviewer/approver names
+            bool canSeeReviewInfo = roleId == 4 || roleId == 5;
 
             var details = await _context.DetailPengajuans
                 .Include(d => d.KodeBarang)
@@ -112,9 +115,11 @@ namespace SiBMN.Controllers.Api
                     pengajuan.IdPejabat,
                     unitName = pengajuan.Unit?.NamaUnit,
                     pejabatName = pengajuan.Pejabat?.Nama,
-                    reviewedByName = pengajuan.Reviewer?.Nama,
+                    reviewedByName = canSeeReviewInfo ? pengajuan.Reviewer?.Nama : null,
                     reviewedById = pengajuan.ReviewedBy,
-                    approvedByName = pengajuan.Approver?.Nama
+                    reviewedAt = canSeeReviewInfo ? pengajuan.ReviewedAt : null,
+                    approvedByName = canSeeReviewInfo ? pengajuan.Approver?.Nama : null,
+                    approvedAt = canSeeReviewInfo ? pengajuan.ApprovedAt : null
                 },
                 details
             });
@@ -207,7 +212,9 @@ namespace SiBMN.Controllers.Api
                     {
                         pengajuan.Status = "Review";
                         pengajuan.ReviewedBy = req.UserId;
+                        pengajuan.ReviewedAt = DateTime.Now;
                         pengajuan.ApprovedBy = null;
+                        pengajuan.ApprovedAt = null;
                     }
                     break;
 
@@ -229,6 +236,7 @@ namespace SiBMN.Controllers.Api
                     {
                         pengajuan.Status = "Approve";
                         pengajuan.ApprovedBy = req.UserId;
+                        pengajuan.ApprovedAt = DateTime.Now;
                     }
                     else
                     {
@@ -242,7 +250,9 @@ namespace SiBMN.Controllers.Api
                     {
                         pengajuan.Status = "draft";
                         pengajuan.ReviewedBy = null;
+                        pengajuan.ReviewedAt = null;
                         pengajuan.ApprovedBy = null;
+                        pengajuan.ApprovedAt = null;
                     }
                     else
                     {

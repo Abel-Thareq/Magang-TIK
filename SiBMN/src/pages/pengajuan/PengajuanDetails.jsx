@@ -13,7 +13,7 @@ export default function PengajuanDetails() {
 
     const loadData = () => {
         setLoading(true);
-        apiGet(`/PengajuanApi/${id}`).then(data => {
+        apiGet(`/PengajuanApi/${id}?roleId=${user?.roleId || ''}`).then(data => {
             if (data) {
                 setPengajuan(data.pengajuan);
                 setDetails(data.details);
@@ -116,24 +116,25 @@ export default function PengajuanDetails() {
                             {statusLower === 'approved' && <span className="badge bg-success">Diajukan</span>}
                             {statusLower === 'review' && (
                                 <span className="badge" style={{backgroundColor: '#17a2b8', color: 'white'}}
-                                    title={`Direview oleh: ${pengajuan.reviewedByName || ''}`}>
+                                    title={(isTimBmn || isPimpinanBmn) ? `Direview oleh: ${pengajuan.reviewedByName || ''}` : undefined}>
                                     Review
                                 </span>
                             )}
                             {statusLower === 'reviewed' && (
                                 <span className="badge" style={{backgroundColor: '#6f42c1', color: 'white'}}
-                                    title={`Direview oleh: ${pengajuan.reviewedByName || ''}`}>
+                                    title={(isTimBmn || isPimpinanBmn) ? `Direview oleh: ${pengajuan.reviewedByName || ''}` : undefined}>
                                     Reviewed
                                 </span>
                             )}
                             {statusLower === 'approve' && (
                                 <span className="badge" style={{backgroundColor: '#28a745', color: 'white'}}
-                                    title={`Disetujui oleh: ${pengajuan.approvedByName || ''}`}>
+                                    title={(isTimBmn || isPimpinanBmn) ? `Disetujui oleh: ${pengajuan.approvedByName || ''}` : undefined}>
                                     Approve
                                 </span>
                             )}
                         </span>
-                        {statusLower === 'review' && pengajuan.reviewedByName && (
+                        {/* Reviewer info visible only to Tim BMN and Pimpinan BMN */}
+                        {(isTimBmn || isPimpinanBmn) && statusLower === 'review' && pengajuan.reviewedByName && (
                             <div style={{ fontSize: '0.8rem', marginTop: 4, color: '#17a2b8' }}>
                                 <i className="fas fa-user-check me-1"></i>Sedang direview oleh: <strong>{pengajuan.reviewedByName}</strong>
                             </div>
@@ -171,6 +172,47 @@ export default function PengajuanDetails() {
                     </div>
                 )}
             </div>
+
+            {/* Informasi Review - hanya terlihat oleh Tim BMN dan Pimpinan BMN */}
+            {(isTimBmn || isPimpinanBmn) && pengajuan.reviewedByName && (
+                <div className="info-card">
+                    <div className="info-card-title"><i className="fas fa-clipboard-check"></i> Informasi Review</div>
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <label>Direview oleh</label>
+                            <span>
+                                <i className="fas fa-user-check me-1" style={{ color: '#17a2b8' }}></i>
+                                {pengajuan.reviewedByName}
+                            </span>
+                        </div>
+                        <div className="info-item">
+                            <label>Tanggal Review</label>
+                            <span>
+                                <i className="fas fa-calendar-check me-1" style={{ color: '#17a2b8' }}></i>
+                                {pengajuan.reviewedAt ? formatDate(pengajuan.reviewedAt, 'long') : '-'}
+                            </span>
+                        </div>
+                        {pengajuan.approvedByName && (
+                            <>
+                                <div className="info-item">
+                                    <label>Disetujui oleh</label>
+                                    <span>
+                                        <i className="fas fa-user-shield me-1" style={{ color: '#28a745' }}></i>
+                                        {pengajuan.approvedByName}
+                                    </span>
+                                </div>
+                                <div className="info-item">
+                                    <label>Tanggal Persetujuan</label>
+                                    <span>
+                                        <i className="fas fa-calendar-check me-1" style={{ color: '#28a745' }}></i>
+                                        {pengajuan.approvedAt ? formatDate(pengajuan.approvedAt, 'long') : '-'}
+                                    </span>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Daftar Barang */}
             <div className="table-container">
