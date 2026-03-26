@@ -3,12 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, formatRupiah, formatDate } from '../../api/api';
 
-// === Progress Tracker Component ===
-function ProgressTracker({ pengajuan, roleId }) {
+// === Progress Tracker Component (Snake / Serpentine Layout) ===
+function ProgressTracker({ pengajuan }) {
     const status = (pengajuan.status || '').toLowerCase();
 
-    // For Tim BMN & Pimpinan BMN: show Tim BMN as one combined node
-    // For other roles: Tim BMN is a single node
     const stages = [
         { key: 'operator', label: 'Operator Unit Kerja', date: pengajuan.submittedAt },
         { key: 'pimpinan_unit', label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt },
@@ -18,32 +16,29 @@ function ProgressTracker({ pengajuan, roleId }) {
         { key: 'kabag_umum', label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt },
     ];
 
-    // Determine which stage index is currently active
+    const row1 = stages.slice(0, 5); // L→R
+    const row2 = stages.slice(5);     // R→L (displayed right-aligned)
+
     const statusToStageIndex = {
         'draft': -1,
         'menunggu pimpinan unit': 0,
         'menunggu wr bpku': 1,
         'menunggu kabiro bpku': 2,
         'menunggu tim bmn': 3,
-        'review': 4,
-        'reviewed': 4,
-        'menunggu kabag umum': 4,
+        'review': 4, 'reviewed': 4, 'menunggu kabag umum': 4,
         'selesai': 5,
     };
 
     const currentIndex = statusToStageIndex[status] ?? -1;
-
-    // For statuses within Tim BMN: check specific sub-status
     const isInTimBmn = ['review', 'reviewed', 'menunggu kabag umum'].includes(status);
     const timBmnCompleted = status === 'menunggu kabag umum' || status === 'selesai';
 
     const getStageStatus = (idx) => {
         if (idx === 4) {
-            // Tim BMN combined node
             if (timBmnCompleted || status === 'selesai') return 'completed';
-            if (isInTimBmn || currentIndex === 3) return currentIndex === 3 ? 'current' : 'active';
-            if (currentIndex > 4) return 'completed';
-            return currentIndex >= 3 ? 'current' : 'upcoming';
+            if (isInTimBmn) return 'active';
+            if (currentIndex === 3) return 'current';
+            return 'upcoming';
         }
         if (idx < currentIndex) return 'completed';
         if (idx === currentIndex) return 'current';
@@ -51,7 +46,6 @@ function ProgressTracker({ pengajuan, roleId }) {
         return 'upcoming';
     };
 
-    // Current stage label for "Sedang menunggu" text
     const getWaitingText = () => {
         const map = {
             'menunggu pimpinan unit': 'Sedang menunggu persetujuan Pimpinan Unit Kerja',
@@ -66,11 +60,27 @@ function ProgressTracker({ pengajuan, roleId }) {
         return map[status] || '';
     };
 
-    const stageStyle = (stageStatus) => {
-        if (stageStatus === 'completed') return { bg: '#f0ad4e', border: '#f0ad4e', color: '#fff' };
-        if (stageStatus === 'current' || stageStatus === 'active') return { bg: '#f0ad4e', border: '#f0ad4e', color: '#fff' };
-        return { bg: '#e9ecef', border: '#dee2e6', color: '#adb5bd' };
+    const isNodeActive = (ss) => ss === 'completed' || ss === 'current' || ss === 'active';
+    const nodeColor = (ss) => isNodeActive(ss) ? '#f0ad4e' : '#dee2e6';
+    const lineActive = (fromIdx, toIdx) => {
+        return isNodeActive(getStageStatus(fromIdx)) && getStageStatus(toIdx) !== 'upcoming';
     };
+    const lineColor = (fromIdx, toIdx) => lineActive(fromIdx, toIdx) ? '#f0ad4e' : '#dee2e6';
+
+    const renderCircle = (ss) => (
+        <div style={{
+            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+            backgroundColor: nodeColor(ss), border: `3px solid ${nodeColor(ss)}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+            {ss === 'completed' && <i className="fas fa-check" style={{ color: '#fff', fontSize: '0.6rem' }}></i>}
+            {(ss === 'current' || ss === 'active') && <div style={{ width: 9, height: 9, borderRadius: '50%', backgroundColor: '#fff' }}></div>}
+        </div>
+    );
+
+    // Curve connector goes from last node of row1 (Tim BMN, idx 4) down to first of row2 (Kabag Umum, idx 5)
+    const curveActive = lineActive(4, 5);
+    const curveCol = curveActive ? '#f0ad4e' : '#dee2e6';
 
     return (
         <div className="info-card" style={{ backgroundColor: '#fffbea' }}>
@@ -78,62 +88,94 @@ function ProgressTracker({ pengajuan, roleId }) {
                 <i className="fas fa-route"></i> Informasi Posisi Pengajuan
             </div>
 
-            {/* Progress nodes */}
-            <div style={{ padding: '20px 10px', overflowX: 'auto' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minWidth: '700px', gap: 0 }}>
-                    {stages.map((stage, idx) => {
-                        const ss = getStageStatus(idx);
-                        const style = stageStyle(ss);
-                        const isLast = idx === stages.length - 1;
+            <div style={{ padding: '20px 20px 10px', overflowX: 'auto' }}>
+                <div style={{ minWidth: '700px', paddingRight: '50px' }}>
 
-                        return (
-                            <div key={stage.key} style={{ display: 'flex', alignItems: 'flex-start', flex: isLast ? '0 0 auto' : '1 1 0' }}>
-                                {/* Node + Label */}
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px' }}>
-                                    {/* Date */}
-                                    <div style={{ fontSize: '0.7rem', color: ss !== 'upcoming' ? '#6c757d' : '#ccc', marginBottom: 4, minHeight: 16, textAlign: 'center' }}>
-                                        {stage.date ? formatDate(stage.date) : ''}
-                                    </div>
-                                    {/* Circle */}
-                                    <div style={{
-                                        width: 28, height: 28, borderRadius: '50%',
-                                        backgroundColor: style.bg, border: `3px solid ${style.border}`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        transition: 'all 0.3s'
-                                    }}>
-                                        {ss === 'completed' && <i className="fas fa-check" style={{ color: '#fff', fontSize: '0.65rem' }}></i>}
-                                        {(ss === 'current' || ss === 'active') && <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#fff' }}></div>}
-                                    </div>
-                                    {/* Label */}
-                                    <div style={{
-                                        fontSize: '0.72rem', fontWeight: ss !== 'upcoming' ? 600 : 400,
-                                        color: ss !== 'upcoming' ? '#333' : '#adb5bd',
-                                        marginTop: 6, textAlign: 'center', lineHeight: 1.2
-                                    }}>
-                                        {stage.label}
-                                    </div>
-                                    {/* Waiting text */}
-                                    {ss === 'current' && status !== 'selesai' && (
-                                        <div style={{ fontSize: '0.62rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
-                                            Menunggu persetujuan
+                    {/* === Single flex row: first 4 nodes + last block (Tim BMN + curve + Kabag Umum) === */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                        {/* First 4 nodes with horizontal lines */}
+                        {row1.slice(0, 4).map((stage, i) => {
+                            const ss = getStageStatus(i);
+                            return (
+                                <div key={stage.key} style={{ display: 'flex', alignItems: 'flex-start', flex: '1 1 0' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
+                                        <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
+                                            {stage.date ? formatDate(stage.date) : '\u00A0'}
                                         </div>
-                                    )}
+                                        {renderCircle(ss)}
+                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
+                                            {stage.label}
+                                        </div>
+                                        {ss === 'current' && status !== 'selesai' && (
+                                            <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
+                                                Sedang menunggu persetujuan
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* Horizontal line */}
+                                    <div style={{ flex: 1, height: 3, marginTop: 33, backgroundColor: lineColor(i, i + 1), borderRadius: 2, minWidth: 12 }}></div>
                                 </div>
+                            );
+                        })}
 
-                                {/* Connector line */}
-                                {!isLast && (
-                                    <div style={{
-                                        flex: 1, height: 3, marginTop: 40,
-                                        backgroundColor: ss === 'completed' || getStageStatus(idx + 1) !== 'upcoming' ? '#f0ad4e' : '#dee2e6',
-                                        borderRadius: 2, minWidth: 20
-                                    }}></div>
-                                )}
-                            </div>
-                        );
-                    })}
+                        {/* === LAST BLOCK: Tim BMN + Curve + Kabag Umum (all in one column) === */}
+                        <div style={{ flex: '0 0 auto', overflow: 'visible' }}>
+                            {/* Tim BMN node */}
+                            {(() => {
+                                const ss = getStageStatus(4);
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
+                                        <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
+                                            {stages[4].date ? formatDate(stages[4].date) : '\u00A0'}
+                                        </div>
+                                        {renderCircle(ss)}
+                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
+                                            {stages[4].label}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* SVG Curve: from Tim BMN circle center down to Kabag Umum circle center */}
+                            {/* The curve starts at center (55px), goes right, then comes back to center */}
+                            <svg width="110" height="70" viewBox="0 0 110 70" style={{ overflow: 'visible', display: 'block', margin: '0 auto' }}>
+                                <path
+                                    d="M 115 -28 C 185 -28, 185 85, 115 85"
+                                    stroke={curveCol}
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+
+                            {/* Kabag Umum node */}
+                            {(() => {
+                                const ss = getStageStatus(5);
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
+                                        {renderCircle(ss)}
+                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
+                                            {stages[5].label}
+                                        </div>
+                                        {stages[5].date && (
+                                            <div style={{ fontSize: '0.68rem', color: '#6c757d', marginTop: 2, textAlign: 'center' }}>
+                                                {formatDate(stages[5].date)}
+                                            </div>
+                                        )}
+                                        {ss === 'current' && status !== 'selesai' && (
+                                            <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
+                                                Sedang menunggu persetujuan
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    </div>
+
                 </div>
 
-                {/* Waiting text below */}
+                {/* Waiting text */}
                 {getWaitingText() && (
                     <div style={{ textAlign: 'center', marginTop: 16, fontSize: '0.82rem', color: '#856404', fontWeight: 500 }}>
                         <i className="fas fa-clock me-1"></i>
@@ -299,7 +341,7 @@ export default function PengajuanDetails() {
 
             {/* Progress Tracker */}
             {statusLower !== 'draft' && (
-                <ProgressTracker pengajuan={pengajuan} roleId={user?.roleId} />
+                <ProgressTracker pengajuan={pengajuan} />
             )}
 
             {/* Informasi Review - hanya terlihat oleh Tim BMN dan Pimpinan BMN */}
