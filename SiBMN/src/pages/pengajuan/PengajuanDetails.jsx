@@ -4,45 +4,98 @@ import { useAuth } from '../../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, formatRupiah, formatDate } from '../../api/api';
 
 // === Progress Tracker Component (Snake / Serpentine Layout) ===
-function ProgressTracker({ pengajuan }) {
+function ProgressTracker({ pengajuan, roleId }) {
     const status = (pengajuan.status || '').toLowerCase();
+    const isBmnRole = roleId === 4 || roleId === 5; // Tim BMN or Pimpinan Tim BMN
 
-    const stages = [
-        { key: 'operator', label: 'Operator Unit Kerja', date: pengajuan.submittedAt },
-        { key: 'pimpinan_unit', label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt },
-        { key: 'wr_bpku', label: 'WR BPKU', date: pengajuan.wrBpkuApprovedAt },
-        { key: 'kabiro_bpku', label: 'Kabiro BPKU', date: pengajuan.kabiroBpkuApprovedAt },
-        { key: 'tim_bmn', label: 'Tim Kerja BMN', date: pengajuan.approvedAt || pengajuan.reviewedAt },
-        { key: 'kabag_umum', label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt },
-    ];
+    // Build stages dynamically based on role
+    const stages = [];
+    stages.push({ key: 'operator', label: 'Operator Unit Kerja', date: pengajuan.submittedAt });
+    stages.push({ key: 'pimpinan_unit', label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt });
+    stages.push({ key: 'wr_bpku', label: 'WR BPKU', date: pengajuan.wrBpkuApprovedAt });
+    stages.push({ key: 'kabiro_bpku', label: 'Kabiro BPKU', date: pengajuan.kabiroBpkuApprovedAt });
+    stages.push({ key: 'tim_bmn', label: 'Tim Kerja BMN', date: pengajuan.reviewedAt });
+    if (isBmnRole) {
+        stages.push({ key: 'pimpinan_bmn', label: 'Pimpinan Tim BMN', date: pengajuan.approvedAt });
+    }
+    stages.push({ key: 'kabag_umum', label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt });
 
-    const row1 = stages.slice(0, 5); // L→R
-    const row2 = stages.slice(5);     // R→L (displayed right-aligned)
+    // Index of Tim BMN in stages = 4
+    // Index of Pimpinan BMN (if BMN role) = 5
+    // Index of Kabag Umum = isBmnRole ? 6 : 5
+    const timBmnIdx = 4;
+    const pimpinanBmnIdx = isBmnRole ? 5 : -1;
+    const kabagIdx = isBmnRole ? 6 : 5;
+    const lastStageIdx = stages.length - 1;
 
-    const statusToStageIndex = {
-        'draft': -1,
-        'menunggu pimpinan unit': 0,
-        'menunggu wr bpku': 1,
-        'menunggu kabiro bpku': 2,
-        'menunggu tim bmn': 3,
-        'review': 4, 'reviewed': 4, 'menunggu kabag umum': 4,
-        'selesai': 5,
-    };
+    // Row 1: first 5 nodes (up to Tim BMN), Row 2: remaining (after Tim BMN)
+    const row1 = stages.slice(0, 5);
+    const row2 = stages.slice(5); // 1 item (non-BMN) or 2 items (BMN)
 
-    const currentIndex = statusToStageIndex[status] ?? -1;
     const isInTimBmn = ['review', 'reviewed', 'menunggu kabag umum'].includes(status);
     const timBmnCompleted = status === 'menunggu kabag umum' || status === 'selesai';
 
     const getStageStatus = (idx) => {
-        if (idx === 4) {
-            if (timBmnCompleted || status === 'selesai') return 'completed';
-            if (isInTimBmn) return 'active';
-            if (currentIndex === 3) return 'current';
+        // Tim Kerja BMN (idx 4)
+        if (idx === timBmnIdx) {
+            if (isBmnRole) {
+                // For BMN roles: Tim BMN is completed when status reaches reviewed or beyond
+                if (['reviewed', 'menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
+                if (status === 'review') return 'active';
+                if (status === 'menunggu tim bmn') return 'current';
+                return idx <= 3 ? 'upcoming' : 'upcoming';
+            } else {
+                // For non-BMN: Tim BMN covers review+reviewed combined
+                if (timBmnCompleted || status === 'selesai') return 'completed';
+                if (isInTimBmn) return 'active';
+                if (status === 'menunggu tim bmn') return 'current';
+                return 'upcoming';
+            }
+        }
+        // Pimpinan Tim BMN (idx 5, only for BMN roles)
+        if (isBmnRole && idx === pimpinanBmnIdx) {
+            if (['menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
+            if (status === 'reviewed') return 'current';
+            if (['review', 'menunggu tim bmn'].includes(status)) return 'upcoming';
+            // Check if we're past it
             return 'upcoming';
         }
-        if (idx < currentIndex) return 'completed';
-        if (idx === currentIndex) return 'current';
-        if (idx === 5 && status === 'selesai') return 'completed';
+        // Kabag Umum
+        if (idx === kabagIdx) {
+            if (status === 'selesai') return 'completed';
+            if (status === 'menunggu kabag umum') return 'current';
+            return 'upcoming';
+        }
+        // General stages (0-3)
+        const stageOrder = {
+            'draft': -1,
+            'menunggu pimpinan unit': 0,
+            'menunggu wr bpku': 1,
+            'menunggu kabiro bpku': 2,
+            'menunggu tim bmn': 3,
+            'review': 4, 'reviewed': 5, 'menunggu kabag umum': 6,
+            'selesai': 7,
+        };
+        const currentOrder = stageOrder[status] ?? -1;
+        const stageOrderVal = stageOrder[Object.keys(stageOrder).find(
+            (_, si) => si === idx
+        )] ?? idx;
+        if (idx < 4) {
+            // Simple: compare idx to where we are
+            const statusProgress = {
+                'draft': -1,
+                'menunggu pimpinan unit': 0,
+                'menunggu wr bpku': 1,
+                'menunggu kabiro bpku': 2,
+                'menunggu tim bmn': 3,
+                'review': 4, 'reviewed': 4, 'menunggu kabag umum': 5,
+                'selesai': 6,
+            };
+            const progress = statusProgress[status] ?? -1;
+            if (idx < progress) return 'completed';
+            if (idx === progress) return 'current';
+            return 'upcoming';
+        }
         return 'upcoming';
     };
 
@@ -62,10 +115,9 @@ function ProgressTracker({ pengajuan }) {
 
     const isNodeActive = (ss) => ss === 'completed' || ss === 'current' || ss === 'active';
     const nodeColor = (ss) => isNodeActive(ss) ? '#f0ad4e' : '#dee2e6';
-    const lineActive = (fromIdx, toIdx) => {
-        return isNodeActive(getStageStatus(fromIdx)) && getStageStatus(toIdx) !== 'upcoming';
+    const lineColor = (fromIdx, toIdx) => {
+        return (isNodeActive(getStageStatus(fromIdx)) && getStageStatus(toIdx) !== 'upcoming') ? '#f0ad4e' : '#dee2e6';
     };
-    const lineColor = (fromIdx, toIdx) => lineActive(fromIdx, toIdx) ? '#f0ad4e' : '#dee2e6';
 
     const renderCircle = (ss) => (
         <div style={{
@@ -78,9 +130,36 @@ function ProgressTracker({ pengajuan }) {
         </div>
     );
 
-    // Curve connector goes from last node of row1 (Tim BMN, idx 4) down to first of row2 (Kabag Umum, idx 5)
-    const curveActive = lineActive(4, 5);
-    const curveCol = curveActive ? '#f0ad4e' : '#dee2e6';
+    const renderNode = (stage, stageIdx, showDate = true) => {
+        const ss = getStageStatus(stageIdx);
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
+                {showDate && (
+                    <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
+                        {stage.date ? formatDate(stage.date) : '\u00A0'}
+                    </div>
+                )}
+                {renderCircle(ss)}
+                <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
+                    {stage.label}
+                </div>
+                {stage.date && !showDate && (
+                    <div style={{ fontSize: '0.68rem', color: '#6c757d', marginTop: 2, textAlign: 'center' }}>
+                        {formatDate(stage.date)}
+                    </div>
+                )}
+                {ss === 'current' && status !== 'selesai' && (
+                    <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
+                        Sedang menunggu persetujuan
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Curve connects Tim BMN (last row1 node) to first row2 node
+    const firstRow2Idx = 5; // index in stages array
+    const curveCol = lineColor(timBmnIdx, firstRow2Idx);
 
     return (
         <div className="info-card" style={{ backgroundColor: '#fffbea' }}>
@@ -89,89 +168,80 @@ function ProgressTracker({ pengajuan }) {
             </div>
 
             <div style={{ padding: '20px 20px 10px', overflowX: 'auto' }}>
-                <div style={{ minWidth: '700px', paddingRight: '50px' }}>
+                <div style={{ position: 'relative', minWidth: '700px', paddingRight: '50px' }}>
 
-                    {/* === Single flex row: first 4 nodes + last block (Tim BMN + curve + Kabag Umum) === */}
+                    {/* === ROW 1: 5 nodes (L→R) === */}
                     <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                        {/* First 4 nodes with horizontal lines */}
                         {row1.slice(0, 4).map((stage, i) => {
                             const ss = getStageStatus(i);
                             return (
                                 <div key={stage.key} style={{ display: 'flex', alignItems: 'flex-start', flex: '1 1 0' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
-                                        <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
-                                            {stage.date ? formatDate(stage.date) : '\u00A0'}
-                                        </div>
-                                        {renderCircle(ss)}
-                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
-                                            {stage.label}
-                                        </div>
-                                        {ss === 'current' && status !== 'selesai' && (
-                                            <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
-                                                Sedang menunggu persetujuan
-                                            </div>
-                                        )}
-                                    </div>
-                                    {/* Horizontal line */}
+                                    {renderNode(stage, i, true)}
                                     <div style={{ flex: 1, height: 3, marginTop: 33, backgroundColor: lineColor(i, i + 1), borderRadius: 2, minWidth: 12 }}></div>
                                 </div>
                             );
                         })}
-
-                        {/* === LAST BLOCK: Tim BMN + Curve + Kabag Umum (all in one column) === */}
-                        <div style={{ flex: '0 0 auto', overflow: 'visible' }}>
-                            {/* Tim BMN node */}
-                            {(() => {
-                                const ss = getStageStatus(4);
-                                return (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
-                                        <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
-                                            {stages[4].date ? formatDate(stages[4].date) : '\u00A0'}
-                                        </div>
-                                        {renderCircle(ss)}
-                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
-                                            {stages[4].label}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-
-                            {/* SVG Curve: from Tim BMN circle center down to Kabag Umum circle center */}
-                            {/* The curve starts at center (55px), goes right, then comes back to center */}
-                            <svg width="110" height="70" viewBox="0 0 110 70" style={{ overflow: 'visible', display: 'block', margin: '0 auto' }}>
-                                <path
-                                    d="M 115 -28 C 185 -28, 185 85, 115 85"
-                                    stroke={curveCol}
-                                    strokeWidth="3"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
-
-                            {/* Kabag Umum node */}
-                            {(() => {
-                                const ss = getStageStatus(5);
-                                return (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
-                                        {renderCircle(ss)}
-                                        <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
-                                            {stages[5].label}
-                                        </div>
-                                        {stages[5].date && (
-                                            <div style={{ fontSize: '0.68rem', color: '#6c757d', marginTop: 2, textAlign: 'center' }}>
-                                                {formatDate(stages[5].date)}
-                                            </div>
-                                        )}
-                                        {ss === 'current' && status !== 'selesai' && (
-                                            <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
-                                                Sedang menunggu persetujuan
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })()}
+                        {/* Tim BMN (last node) */}
+                        <div style={{ flex: '0 0 auto' }}>
+                            {renderNode(stages[timBmnIdx], timBmnIdx, true)}
                         </div>
                     </div>
+
+                    {/* === ROW 2: mirrors same flex structure for perfect alignment === */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '55px' }}>
+                        {isBmnRole ? (
+                            <>
+                                {/* 3 invisible spacers matching first 3 flex items of row 1 */}
+                                <div style={{ flex: '1 1 0' }} />
+                                <div style={{ flex: '1 1 0' }} />
+                                <div style={{ flex: '1 1 0' }} />
+                                {/* Kabag Umum + line (matches 4th flex item position = Kabiro BPKU) */}
+                                <div style={{ display: 'flex', alignItems: 'flex-start', flex: '1 1 0' }}>
+                                    {renderNode(stages[kabagIdx], kabagIdx, false)}
+                                    <div style={{ flex: 1, height: 3, marginTop: 13, backgroundColor: lineColor(pimpinanBmnIdx, kabagIdx), borderRadius: 2, minWidth: 12 }}></div>
+                                </div>
+                                {/* Pimpinan BMN (matches Tim BMN position) */}
+                                <div style={{ flex: '0 0 auto' }}>
+                                    {renderNode(stages[pimpinanBmnIdx], pimpinanBmnIdx, false)}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* 4 invisible spacers matching first 4 flex items of row 1 */}
+                                <div style={{ flex: '1 1 0' }} />
+                                <div style={{ flex: '1 1 0' }} />
+                                <div style={{ flex: '1 1 0' }} />
+                                <div style={{ flex: '1 1 0' }} />
+                                {/* Kabag Umum (matches Tim BMN position) */}
+                                <div style={{ flex: '0 0 auto' }}>
+                                    {renderNode(stages[kabagIdx], kabagIdx, false)}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* === SVG Curve (absolute): connects Tim BMN → rightmost row2 node === */}
+                    <svg
+                        style={{
+                            position: 'absolute',
+                            top: '31px', // Exact center of row 1 circles
+                            right: '50px', // Exact alignment with the 110px flex column
+                            pointerEvents: 'none',
+                            overflow: 'visible',
+                        }}
+                        width="110"
+                        height="115"
+                        viewBox="0 0 110 115"
+                        fill="none"
+                    >
+                        <path
+                            d="M 110 0 C 170 0, 170 105, 110 105"
+                            stroke={curveCol}
+                            strokeWidth="3"
+                            fill="none"
+                            strokeLinecap="round"
+                        />
+                    </svg>
 
                 </div>
 
@@ -341,7 +411,7 @@ export default function PengajuanDetails() {
 
             {/* Progress Tracker */}
             {statusLower !== 'draft' && (
-                <ProgressTracker pengajuan={pengajuan} />
+                <ProgressTracker pengajuan={pengajuan} roleId={user?.roleId} />
             )}
 
             {/* Informasi Review - hanya terlihat oleh Tim BMN dan Pimpinan BMN */}
