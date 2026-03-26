@@ -34,8 +34,8 @@ export default function PengajuanIndex() {
             return;
         }
 
-        // If draft → auto trigger Review and lock to this user
-        if (s === 'draft' || s === 'approved') {
+        // If Menunggu Tim BMN → auto trigger Review and lock to this user
+        if (s === 'menunggu tim bmn') {
             await apiPatch(`/PengajuanApi/${item.idPengajuan}/status`, {
                 status: 'Review',
                 userId: user.userId,
@@ -46,41 +46,31 @@ export default function PengajuanIndex() {
         navigate(`/pengajuan/${item.idPengajuan}`);
     };
 
-    // Helper to render status badge with tooltip
+    // Helper to render status badge
     const renderStatus = (item) => {
         const s = (item.status || '').toLowerCase();
-        if (s === 'draft') return <span className="badge-status badge-draft">Draft</span>;
-        if (s === 'approved') return <span className="badge-status badge-approved">Diajukan</span>;
-        if (s === 'review') return (
-            <span
-                className="badge-status"
-                style={{ backgroundColor: '#17a2b8', color: 'white', cursor: 'pointer' }}
-                title={`Direview oleh: ${item.reviewedByName || 'Tim BMN'}`}>
-                Review
+        const statusMap = {
+            'draft': { label: 'Draft', bg: '#ffc107', color: '#000' },
+            'menunggu pimpinan unit': { label: 'Menunggu Pimpinan Unit', bg: '#fd7e14', color: '#fff' },
+            'menunggu wr bpku': { label: 'Menunggu WR BPKU', bg: '#e83e8c', color: '#fff' },
+            'menunggu kabiro bpku': { label: 'Menunggu Kabiro BPKU', bg: '#6610f2', color: '#fff' },
+            'menunggu tim bmn': { label: 'Menunggu Tim BMN', bg: '#20c997', color: '#fff' },
+            'review': { label: 'Review', bg: '#17a2b8', color: '#fff' },
+            'reviewed': { label: 'Reviewed', bg: '#6f42c1', color: '#fff' },
+            'menunggu kabag umum': { label: 'Menunggu Kabag Umum', bg: '#007bff', color: '#fff' },
+            'selesai': { label: 'Selesai', bg: '#28a745', color: '#fff' },
+        };
+        const cfg = statusMap[s] || { label: item.status, bg: '#6c757d', color: '#fff' };
+        return (
+            <span className="badge-status" style={{ backgroundColor: cfg.bg, color: cfg.color }}
+                title={s === 'review' && item.reviewedByName ? `Direview oleh: ${item.reviewedByName}` : ''}>
+                {cfg.label}
             </span>
         );
-        if (s === 'reviewed') return (
-            <span
-                className="badge-status"
-                style={{ backgroundColor: '#6f42c1', color: 'white', cursor: 'pointer' }}
-                title={`Direview oleh: ${item.reviewedByName || 'Tim BMN'}`}>
-                Reviewed
-            </span>
-        );
-        if (s === 'approve') return (
-            <span
-                className="badge-status"
-                style={{ backgroundColor: '#28a745', color: 'white', cursor: 'pointer' }}
-                title={`Status: Approve\nOleh: ${item.approvedByName || 'Pimpinan'}\nPosisi Saat ini: Pimpinan BMN`}>
-                Approve
-            </span>
-        );
-        return <span className="badge-status badge-disapproved">{item.status}</span>;
     };
 
     const canCreate = user?.roleId === 1;
     const isTimBmn = user?.roleId === 4;
-    const isPimpinanBmn = user?.roleId === 5;
 
     return (
         <div className="fade-in">

@@ -92,6 +92,30 @@ namespace SiBMN.Data
                 .HasForeignKey(p => p.ApprovedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.PimpinanUnitApprover)
+                .WithMany()
+                .HasForeignKey(p => p.PimpinanUnitApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.WrBpkuApprover)
+                .WithMany()
+                .HasForeignKey(p => p.WrBpkuApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.KabiroBpkuApprover)
+                .WithMany()
+                .HasForeignKey(p => p.KabiroBpkuApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pengajuan>()
+                .HasOne(p => p.KabagUmumApprover)
+                .WithMany()
+                .HasForeignKey(p => p.KabagUmumApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<DetailPengajuan>()
                 .HasOne(d => d.Pengajuan)
                 .WithMany(p => p.DetailPengajuans)
@@ -181,7 +205,11 @@ namespace SiBMN.Data
                 new Role { IdRole = 2, NamaRole = "Tim Pengadaan" },
                 new Role { IdRole = 3, NamaRole = "Admin Pusat" },
                 new Role { IdRole = 4, NamaRole = "Tim Kerja BMN" },
-                new Role { IdRole = 5, NamaRole = "Pimpinan BMN" }
+                new Role { IdRole = 5, NamaRole = "Pimpinan BMN" },
+                new Role { IdRole = 6, NamaRole = "Pimpinan Unit Kerja" },
+                new Role { IdRole = 7, NamaRole = "WR BPKU" },
+                new Role { IdRole = 8, NamaRole = "Kabiro BPKU" },
+                new Role { IdRole = 9, NamaRole = "Kabag Umum" }
             );
 
             // Units (UPA = Unit Pelaksana)
@@ -211,7 +239,17 @@ namespace SiBMN.Data
                 new User { IdUser = 9, Nama = "Abel Thareq", Email = "bmn@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
                 new User { IdUser = 11, Nama = "Akmal Hasan", Email = "akmal@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
                 // Pimpinan BMN (Role 5)
-                new User { IdUser = 10, Nama = "Kurnadi", Email = "kurnadi@univ.ac.id", Password = "admin123", RoleId = 5, UnitId = 4 }
+                new User { IdUser = 10, Nama = "Kurnadi", Email = "kurnadi@univ.ac.id", Password = "admin123", RoleId = 5, UnitId = 4 },
+                // Pimpinan Unit Kerja (Role 6) - one per unit
+                new User { IdUser = 12, Nama = "Pimpinan UPA TIK", Email = "pimpinan.upatik@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 1 },
+                new User { IdUser = 13, Nama = "Pimpinan UPA Bahasa", Email = "pimpinan.upabahasa@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 2 },
+                new User { IdUser = 14, Nama = "Pimpinan UPA Perpustakaan", Email = "pimpinan.upaperpus@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 3 },
+                // WR BPKU (Role 7)
+                new User { IdUser = 15, Nama = "WR BPKU", Email = "wrbpku@univ.ac.id", Password = "admin123", RoleId = 7, UnitId = 4 },
+                // Kabiro BPKU (Role 8)
+                new User { IdUser = 16, Nama = "Kabiro BPKU", Email = "kabirobpku@univ.ac.id", Password = "admin123", RoleId = 8, UnitId = 4 },
+                // Kabag Umum (Role 9)
+                new User { IdUser = 17, Nama = "Kabag Umum", Email = "kabagumum@univ.ac.id", Password = "admin123", RoleId = 9, UnitId = 4 }
             );
 
             // Mock Pengajuan data for each UPA
