@@ -16,7 +16,6 @@ namespace SiBMN.Controllers.Api
             _context = context;
         }
 
-        // GET: api/pengajuanapi?unitId=1&roleId=1
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int? unitId, [FromQuery] int? roleId)
         {
@@ -26,12 +25,10 @@ namespace SiBMN.Controllers.Api
                 .Include(p => p.Reviewer)
                 .Include(p => p.Approver);
 
-            // Role 1 (Admin Unit) and Role 6 (Pimpinan Unit) see their own unit only
             if ((roleId == 1 || roleId == 6) && unitId.HasValue)
             {
                 query = query.Where(p => p.UnitId == unitId.Value);
             }
-            // Roles 4,5,7,8,9 see ALL pengajuan
 
             var pengajuans = await query.OrderByDescending(p => p.TanggalPengajuan)
                 .Select(p => new
@@ -52,7 +49,6 @@ namespace SiBMN.Controllers.Api
             return Ok(pengajuans);
         }
 
-        // GET: api/pengajuanapi/5?roleId=4
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id, [FromQuery] int? roleId)
         {
@@ -69,7 +65,6 @@ namespace SiBMN.Controllers.Api
 
             if (pengajuan == null) return NotFound();
 
-            // Only Tim BMN (4) and Pimpinan BMN (5) can see BMN reviewer/approver names
             bool canSeeBmnReviewInfo = roleId == 4 || roleId == 5;
 
             var details = await _context.DetailPengajuans
@@ -120,7 +115,6 @@ namespace SiBMN.Controllers.Api
                     pengajuan.IdPejabat,
                     unitName = pengajuan.Unit?.NamaUnit,
                     pejabatName = pengajuan.Pejabat?.Nama,
-                    // Per-stage tracking info
                     submittedAt = pengajuan.SubmittedAt,
                     pimpinanUnitApprovedByName = pengajuan.PimpinanUnitApprover?.Nama,
                     pimpinanUnitApprovedAt = pengajuan.PimpinanUnitApprovedAt,
@@ -128,7 +122,6 @@ namespace SiBMN.Controllers.Api
                     wrBpkuApprovedAt = pengajuan.WrBpkuApprovedAt,
                     kabiroBpkuApprovedByName = pengajuan.KabiroBpkuApprover?.Nama,
                     kabiroBpkuApprovedAt = pengajuan.KabiroBpkuApprovedAt,
-                    // BMN review info — restricted to Tim BMN & Pimpinan BMN
                     reviewedByName = canSeeBmnReviewInfo ? pengajuan.Reviewer?.Nama : null,
                     reviewedById = pengajuan.ReviewedBy,
                     reviewedAt = canSeeBmnReviewInfo ? pengajuan.ReviewedAt : null,
@@ -152,7 +145,6 @@ namespace SiBMN.Controllers.Api
             public int UnitId { get; set; }
         }
 
-        // POST: api/pengajuanapi
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] PengajuanRequest model)
         {
@@ -175,7 +167,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { id = pengajuan.IdPengajuan, message = "Pengajuan berhasil dibuat" });
         }
 
-        // PUT: api/pengajuanapi/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PengajuanRequest model)
         {
@@ -193,7 +184,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Pengajuan berhasil diperbarui" });
         }
 
-        // POST: api/pengajuanapi/5/submit
         [HttpPost("{id}/submit")]
         public async Task<IActionResult> Submit(int id)
         {
@@ -214,7 +204,6 @@ namespace SiBMN.Controllers.Api
             public int RoleId { get; set; }
         }
 
-        // PATCH: api/pengajuanapi/5/status
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest req)
         {
@@ -223,7 +212,6 @@ namespace SiBMN.Controllers.Api
 
             switch (req.Status)
             {
-                // === Pimpinan Unit Kerja (Role 6) ===
                 case "ApprovePimpinanUnit":
                     if (req.RoleId == 6 && pengajuan.Status == "Menunggu Pimpinan Unit")
                     {
@@ -245,7 +233,6 @@ namespace SiBMN.Controllers.Api
                     else return BadRequest(new { message = "Hanya Pimpinan Unit Kerja yang bisa menolak pada tahap ini" });
                     break;
 
-                // === WR BPKU (Role 7) ===
                 case "ApproveWrBpku":
                     if (req.RoleId == 7 && pengajuan.Status == "Menunggu WR BPKU")
                     {
@@ -266,7 +253,6 @@ namespace SiBMN.Controllers.Api
                     else return BadRequest(new { message = "Hanya WR BPKU yang bisa menolak pada tahap ini" });
                     break;
 
-                // === Kabiro BPKU (Role 8) ===
                 case "ApproveKabiroBpku":
                     if (req.RoleId == 8 && pengajuan.Status == "Menunggu Kabiro BPKU")
                     {
@@ -287,7 +273,6 @@ namespace SiBMN.Controllers.Api
                     else return BadRequest(new { message = "Hanya Kabiro BPKU yang bisa menolak pada tahap ini" });
                     break;
 
-                // === Tim BMN (Role 4) — Review ===
                 case "Review":
                     if (pengajuan.Status == "Menunggu Tim BMN")
                     {
@@ -307,7 +292,6 @@ namespace SiBMN.Controllers.Api
                     else return BadRequest(new { message = "Hanya reviewer yang bisa menyelesaikan review" });
                     break;
 
-                // === Pimpinan BMN (Role 5) — Approve/Reject ===
                 case "Approve":
                     if (req.RoleId == 5 && pengajuan.Status == "Reviewed")
                     {
@@ -330,7 +314,6 @@ namespace SiBMN.Controllers.Api
                     else return BadRequest(new { message = "Hanya Pimpinan BMN yang bisa menolak pengajuan" });
                     break;
 
-                // === Kabag Umum (Role 9) ===
                 case "ApproveKabagUmum":
                     if (req.RoleId == 9 && pengajuan.Status == "Menunggu Kabag Umum")
                     {
@@ -359,7 +342,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Status berhasil diperbarui", status = pengajuan.Status });
         }
 
-        // DELETE: api/pengajuanapi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -375,7 +357,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Pengajuan berhasil dihapus!" });
         }
 
-        // GET: api/pengajuanapi/pejabats
         [HttpGet("pejabats")]
         public async Task<IActionResult> GetPejabats()
         {

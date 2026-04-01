@@ -33,7 +33,6 @@ namespace SiBMN.Controllers.Api
             var totalBarang = await _context.DetailPengajuans
                 .CountAsync(d => pengajuanIds.Contains(d.IdPengajuan));
 
-            // Recent pengajuan (latest 5)
             var recentPengajuan = await query
                 .Include(p => p.Unit)
                 .OrderByDescending(p => p.TanggalPengajuan)
@@ -48,7 +47,6 @@ namespace SiBMN.Controllers.Api
                 })
                 .ToListAsync();
 
-            // Asset distribution by golongan (top-level)
             var golongans = await _context.KodeBarangs
                 .Where(k => k.KodeBidang == "00" && k.KodeKelompok == "00" && k.KodeSubKelompok == "00" && k.KodeBarangValue == "000")
                 .Select(g => new { g.KodeGolongan, g.UraianBarang })

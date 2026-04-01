@@ -55,7 +55,6 @@ namespace SiBMN.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure relationships
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
                 .WithMany(r => r.Users)
@@ -188,18 +187,15 @@ namespace SiBMN.Data
                 .HasForeignKey(m => m.IdRuang)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // KodeBarang unique index
             modelBuilder.Entity<KodeBarang>()
                 .HasIndex(k => new { k.KodeGolongan, k.KodeBidang, k.KodeKelompok, k.KodeSubKelompok, k.KodeBarangValue })
                 .IsUnique();
 
-            // Seed Data
             SeedData(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
         {
-            // Roles
             modelBuilder.Entity<Role>().HasData(
                 new Role { IdRole = 1, NamaRole = "Admin Unit Kerja" },
                 new Role { IdRole = 2, NamaRole = "Tim Pengadaan" },
@@ -212,7 +208,6 @@ namespace SiBMN.Data
                 new Role { IdRole = 9, NamaRole = "Kabag Umum" }
             );
 
-            // Units (UPA = Unit Pelaksana)
             modelBuilder.Entity<Unit>().HasData(
                 new Unit { IdUnit = 1, NamaUnit = "UPA TIK" },
                 new Unit { IdUnit = 2, NamaUnit = "UPA Bahasa" },
@@ -222,54 +217,37 @@ namespace SiBMN.Data
                 new Unit { IdUnit = 6, NamaUnit = "UPA Taman Agroteknologi" }
             );
 
-            // Users
             modelBuilder.Entity<User>().HasData(
-                // Admin Unit Kerja (Role 1)
                 new User { IdUser = 1, Nama = "Admin UPA TIK", Email = "admin.upatik@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 1 },
                 new User { IdUser = 2, Nama = "Admin UPA Bahasa", Email = "admin.upabahasa@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 2 },
                 new User { IdUser = 3, Nama = "Admin UPA Perpustakaan", Email = "admin.upaperpustakaan@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 3 },
                 new User { IdUser = 4, Nama = "Admin UPA Karier", Email = "admin.upakarier@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 5 },
                 new User { IdUser = 5, Nama = "Admin UPA Agroteknologi", Email = "admin.upaagrotek@univ.ac.id", Password = "admin123", RoleId = 1, UnitId = 6 },
-                // Tim Pengadaan (Role 2)
                 new User { IdUser = 6, Nama = "Tim Pengadaan", Email = "pengadaan@univ.ac.id", Password = "admin123", RoleId = 2, UnitId = 4 },
-                // Admin Pusat / Pejabat (Role 3)
                 new User { IdUser = 7, Nama = "Prof. Dr. Budi Santoso", Email = "budi@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
                 new User { IdUser = 8, Nama = "Dr. Siti Rahayu, M.Sc.", Email = "siti@univ.ac.id", Password = "admin123", RoleId = 3, UnitId = 4 },
-                // Tim Kerja BMN (Role 4)
                 new User { IdUser = 9, Nama = "Abel Thareq", Email = "bmn@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
                 new User { IdUser = 11, Nama = "Akmal Hasan", Email = "akmal@univ.ac.id", Password = "admin123", RoleId = 4, UnitId = 4 },
-                // Pimpinan BMN (Role 5)
                 new User { IdUser = 10, Nama = "Kurnadi", Email = "kurnadi@univ.ac.id", Password = "admin123", RoleId = 5, UnitId = 4 },
-                // Pimpinan Unit Kerja (Role 6) - one per unit
                 new User { IdUser = 12, Nama = "Pimpinan UPA TIK", Email = "pimpinan.upatik@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 1 },
                 new User { IdUser = 13, Nama = "Pimpinan UPA Bahasa", Email = "pimpinan.upabahasa@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 2 },
                 new User { IdUser = 14, Nama = "Pimpinan UPA Perpustakaan", Email = "pimpinan.upaperpus@univ.ac.id", Password = "admin123", RoleId = 6, UnitId = 3 },
-                // WR BPKU (Role 7)
                 new User { IdUser = 15, Nama = "WR BPKU", Email = "wrbpku@univ.ac.id", Password = "admin123", RoleId = 7, UnitId = 4 },
-                // Kabiro BPKU (Role 8)
                 new User { IdUser = 16, Nama = "Kabiro BPKU", Email = "kabirobpku@univ.ac.id", Password = "admin123", RoleId = 8, UnitId = 4 },
-                // Kabag Umum (Role 9)
                 new User { IdUser = 17, Nama = "Kabag Umum", Email = "kabagumum@univ.ac.id", Password = "admin123", RoleId = 9, UnitId = 4 }
             );
 
-            // Mock Pengajuan data for each UPA
             modelBuilder.Entity<Pengajuan>().HasData(
-                // UPA TIK
                 new Pengajuan { IdPengajuan = 1, TanggalPengajuan = new DateTime(2025, 2, 19), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 45000000, UnitId = 1, TahunAnggaran = 2025 },
                 new Pengajuan { IdPengajuan = 2, TanggalPengajuan = new DateTime(2025, 2, 20), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 32000000, UnitId = 1, TahunAnggaran = 2025 },
-                // UPA Bahasa
                 new Pengajuan { IdPengajuan = 3, TanggalPengajuan = new DateTime(2025, 2, 21), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 28000000, UnitId = 2, TahunAnggaran = 2025 },
                 new Pengajuan { IdPengajuan = 4, TanggalPengajuan = new DateTime(2025, 2, 22), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 15500000, UnitId = 2, TahunAnggaran = 2025 },
-                // UPA Perpustakaan
                 new Pengajuan { IdPengajuan = 5, TanggalPengajuan = new DateTime(2025, 2, 23), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 52000000, UnitId = 3, TahunAnggaran = 2025 },
-                // UPA Karier & Kewirausahaan
                 new Pengajuan { IdPengajuan = 6, TanggalPengajuan = new DateTime(2025, 2, 24), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 19000000, UnitId = 5, TahunAnggaran = 2025 },
                 new Pengajuan { IdPengajuan = 7, TanggalPengajuan = new DateTime(2025, 2, 25), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 8500000, UnitId = 5, TahunAnggaran = 2025 },
-                // UPA Taman Agroteknologi
                 new Pengajuan { IdPengajuan = 8, TanggalPengajuan = new DateTime(2025, 2, 26), JenisPengajuan = "Belanja Modal", Status = "draft", TotalHarga = 37500000, UnitId = 6, TahunAnggaran = 2025 }
             );
 
-            // Kategori Barang
             modelBuilder.Entity<KategoriBarang>().HasData(
                 new KategoriBarang { IdKategori = 1, NamaKategori = "Peralatan dan Mesin" },
                 new KategoriBarang { IdKategori = 2, NamaKategori = "Gedung dan Bangunan" },
@@ -277,7 +255,6 @@ namespace SiBMN.Data
                 new KategoriBarang { IdKategori = 4, NamaKategori = "Aset Tetap Lainnya" }
             );
 
-            // Master Barang
             modelBuilder.Entity<MasterBarang>().HasData(
                 new MasterBarang { IdBarang = 1, IdKategori = 1, NamaBarang = "Laptop", Spesifikasi = "Laptop untuk kebutuhan kantor", Satuan = "Unit" },
                 new MasterBarang { IdBarang = 2, IdKategori = 1, NamaBarang = "Printer Laser", Spesifikasi = "Printer laser monochrome", Satuan = "Unit" },
@@ -296,7 +273,6 @@ namespace SiBMN.Data
                 new MasterBarang { IdBarang = 15, IdKategori = 1, NamaBarang = "CCTV Camera", Spesifikasi = "IP Camera outdoor", Satuan = "Unit" }
             );
 
-            // Ruang Gedung
             modelBuilder.Entity<RuangGedung>().HasData(
                 new RuangGedung { IdRuang = 1, NamaGedung = "Gedung A - Rektorat", NamaRuang = "Ruang Rapat Utama", IdUnit = 4 },
                 new RuangGedung { IdRuang = 2, NamaGedung = "Gedung A - Rektorat", NamaRuang = "Ruang Kerja Lantai 1", IdUnit = 4 },
@@ -310,9 +286,7 @@ namespace SiBMN.Data
                 new RuangGedung { IdRuang = 10, NamaGedung = "Gedung E - Perpustakaan", NamaRuang = "Ruang Server", IdUnit = 5 }
             );
 
-            // Kode Barang (comprehensive seed data)
             modelBuilder.Entity<KodeBarang>().HasData(
-                // === GOLONGAN ===
                 new KodeBarang { Id = 1, KodeGolongan = "1", KodeBidang = "00", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Barang Kuasi" },
                 new KodeBarang { Id = 2, KodeGolongan = "2", KodeBidang = "00", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Tanah" },
                 new KodeBarang { Id = 3, KodeGolongan = "3", KodeBidang = "00", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Peralatan dan Mesin" },
@@ -320,7 +294,6 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 5, KodeGolongan = "5", KodeBidang = "00", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Jalan, Irigasi dan Jaringan" },
                 new KodeBarang { Id = 6, KodeGolongan = "6", KodeBidang = "00", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Aset Tetap Lainnya" },
 
-                // === BIDANG di bawah Golongan 3 (Peralatan dan Mesin) ===
                 new KodeBarang { Id = 10, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Besar" },
                 new KodeBarang { Id = 11, KodeGolongan = "3", KodeBidang = "02", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Angkutan" },
                 new KodeBarang { Id = 12, KodeGolongan = "3", KodeBidang = "03", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Bengkel dan Alat Ukur" },
@@ -331,47 +304,38 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 17, KodeGolongan = "3", KodeBidang = "08", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Laboratorium" },
                 new KodeBarang { Id = 18, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Komputer" },
 
-                // === BIDANG di bawah Golongan 4 (Gedung dan Bangunan) ===
                 new KodeBarang { Id = 19, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Bangunan Gedung" },
                 new KodeBarang { Id = 20, KodeGolongan = "4", KodeBidang = "02", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Monumen" },
 
-                // === KELOMPOK di bawah 3.05 (Alat Kantor dan Rumah Tangga) ===
                 new KodeBarang { Id = 21, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Kantor" },
                 new KodeBarang { Id = 22, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Rumah Tangga" },
                 new KodeBarang { Id = 23, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "03", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Peralatan Komputer" },
 
-                // === KELOMPOK di bawah 3.09 (Komputer) ===
                 new KodeBarang { Id = 24, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Komputer Unit" },
                 new KodeBarang { Id = 25, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Peralatan Komputer" },
                 new KodeBarang { Id = 26, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Peralatan Jaringan" },
 
-                // === KELOMPOK di bawah 3.01 (Alat Besar) ===
                 new KodeBarang { Id = 27, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Besar Darat" },
                 new KodeBarang { Id = 28, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "02", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Alat Besar Apung" },
 
-                // === SUB KELOMPOK di bawah 3.05.01 (Alat Kantor) ===
                 new KodeBarang { Id = 30, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Mesin Ketik" },
                 new KodeBarang { Id = 31, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "02", KodeBarangValue = "000", UraianBarang = "Mesin Hitung/Jumlah" },
                 new KodeBarang { Id = 32, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "000", UraianBarang = "Alat Penyimpanan Perlengkapan Kantor" },
                 new KodeBarang { Id = 33, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "04", KodeBarangValue = "000", UraianBarang = "Alat Kantor Lainnya" },
 
-                // === SUB KELOMPOK di bawah 3.05.02 (Alat Rumah Tangga) ===
                 new KodeBarang { Id = 34, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Meubelair" },
                 new KodeBarang { Id = 35, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "000", UraianBarang = "Alat Pendingin" },
                 new KodeBarang { Id = 36, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "000", UraianBarang = "Alat Dapur" },
                 new KodeBarang { Id = 37, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "04", KodeBarangValue = "000", UraianBarang = "Alat Pembersih" },
 
-                // === SUB KELOMPOK di bawah 3.09.01 (Komputer Unit) ===
                 new KodeBarang { Id = 38, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Komputer/PC" },
                 new KodeBarang { Id = 39, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "02", KodeBarangValue = "000", UraianBarang = "Laptop/Notebook" },
                 new KodeBarang { Id = 40, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "000", UraianBarang = "Server" },
 
-                // === SUB KELOMPOK di bawah 3.09.02 (Peralatan Komputer) ===
                 new KodeBarang { Id = 41, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Peralatan Mainframe" },
                 new KodeBarang { Id = 42, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "000", UraianBarang = "Peralatan Mini Komputer" },
                 new KodeBarang { Id = 43, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "000", UraianBarang = "Peralatan Personal Komputer" },
 
-                // === KODE BARANG di bawah 3.05.01.03 (Alat Penyimpanan) ===
                 new KodeBarang { Id = 50, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "001", UraianBarang = "Lemari Besi/Metal" },
                 new KodeBarang { Id = 51, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "002", UraianBarang = "Lemari Kayu" },
                 new KodeBarang { Id = 52, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "003", UraianBarang = "Rak Besi/Metal" },
@@ -379,7 +343,6 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 54, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "005", UraianBarang = "Filing Cabinet Besi" },
                 new KodeBarang { Id = 55, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "006", UraianBarang = "Brand Kas" },
 
-                // === KODE BARANG di bawah 3.05.02.01 (Meubelair) ===
                 new KodeBarang { Id = 56, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "Meja Kerja" },
                 new KodeBarang { Id = 57, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "002", UraianBarang = "Meja Rapat" },
                 new KodeBarang { Id = 58, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "003", UraianBarang = "Kursi Kerja" },
@@ -387,23 +350,19 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 60, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "005", UraianBarang = "Tempat Tidur" },
                 new KodeBarang { Id = 61, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "006", UraianBarang = "Sofa" },
 
-                // === KODE BARANG di bawah 3.05.02.02 (Alat Pendingin) ===
                 new KodeBarang { Id = 62, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "001", UraianBarang = "AC Split" },
                 new KodeBarang { Id = 63, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "002", UraianBarang = "AC Window" },
                 new KodeBarang { Id = 64, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "003", UraianBarang = "Kipas Angin" },
                 new KodeBarang { Id = 65, KodeGolongan = "3", KodeBidang = "05", KodeKelompok = "02", KodeSubKelompok = "02", KodeBarangValue = "004", UraianBarang = "Exhaust Fan" },
 
-                // === KODE BARANG di bawah 3.09.01.01 (Komputer/PC) ===
                 new KodeBarang { Id = 66, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "PC Desktop" },
                 new KodeBarang { Id = 67, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "002", UraianBarang = "PC All-in-One" },
                 new KodeBarang { Id = 68, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "003", UraianBarang = "PC Mini/NUC" },
 
-                // === KODE BARANG di bawah 3.09.01.02 (Laptop/Notebook) ===
                 new KodeBarang { Id = 69, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "02", KodeBarangValue = "001", UraianBarang = "Laptop 14 inch" },
                 new KodeBarang { Id = 70, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "02", KodeBarangValue = "002", UraianBarang = "Laptop 15 inch" },
                 new KodeBarang { Id = 71, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "02", KodeBarangValue = "003", UraianBarang = "Notebook Ultrabook" },
 
-                // === KODE BARANG di bawah 3.09.02.03 (Peralatan Personal Komputer) ===
                 new KodeBarang { Id = 72, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "001", UraianBarang = "Printer Laser" },
                 new KodeBarang { Id = 73, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "002", UraianBarang = "Printer Inkjet" },
                 new KodeBarang { Id = 74, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "003", UraianBarang = "Scanner" },
@@ -413,24 +372,20 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 78, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "007", UraianBarang = "Keyboard" },
                 new KodeBarang { Id = 79, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "02", KodeSubKelompok = "03", KodeBarangValue = "008", UraianBarang = "Mouse" },
 
-                // === KODE BARANG di bawah 3.09.03 (Peralatan Jaringan) - kelompok + sub + barang ===
                 new KodeBarang { Id = 80, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Peralatan Jaringan LAN" },
                 new KodeBarang { Id = 81, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "Router WiFi" },
                 new KodeBarang { Id = 82, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "01", KodeBarangValue = "002", UraianBarang = "Switch Managed" },
                 new KodeBarang { Id = 83, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "01", KodeBarangValue = "003", UraianBarang = "Access Point" },
                 new KodeBarang { Id = 84, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "03", KodeSubKelompok = "01", KodeBarangValue = "004", UraianBarang = "CCTV IP Camera" },
 
-                // === KODE BARANG di bawah 3.09.01.03 (Server) ===
                 new KodeBarang { Id = 85, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "001", UraianBarang = "Server Tower" },
                 new KodeBarang { Id = 86, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "002", UraianBarang = "Server Rack" },
                 new KodeBarang { Id = 87, KodeGolongan = "3", KodeBidang = "09", KodeKelompok = "01", KodeSubKelompok = "03", KodeBarangValue = "003", UraianBarang = "Server Blade" },
 
-                // === KODE BARANG di bawah 3.01.01 (Alat Besar Darat) ===
                 new KodeBarang { Id = 88, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Traktor" },
                 new KodeBarang { Id = 89, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "Traktor Roda Dua" },
                 new KodeBarang { Id = 90, KodeGolongan = "3", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "002", UraianBarang = "Traktor Roda Empat" },
 
-                // === KODE BARANG di Golongan 4 (Gedung dan Bangunan) ===
                 new KodeBarang { Id = 100, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Bangunan Gedung Tempat Kerja" },
                 new KodeBarang { Id = 101, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Gedung Kantor" },
                 new KodeBarang { Id = 102, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "Gedung Kantor Permanen" },
@@ -443,7 +398,6 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 109, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "004", UraianBarang = "Gedung Perpustakaan" },
                 new KodeBarang { Id = 110, KodeGolongan = "4", KodeBidang = "01", KodeKelompok = "02", KodeSubKelompok = "01", KodeBarangValue = "005", UraianBarang = "Gedung Aula" },
 
-                // === KODE BARANG di Golongan 5 (Jalan, Irigasi dan Jaringan) ===
                 new KodeBarang { Id = 120, KodeGolongan = "5", KodeBidang = "01", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Jalan dan Jembatan" },
                 new KodeBarang { Id = 121, KodeGolongan = "5", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Jalan" },
                 new KodeBarang { Id = 122, KodeGolongan = "5", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Jalan Kampus" },
@@ -463,7 +417,6 @@ namespace SiBMN.Data
                 new KodeBarang { Id = 136, KodeGolongan = "5", KodeBidang = "04", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "001", UraianBarang = "Jaringan Listrik Gedung A" },
                 new KodeBarang { Id = 137, KodeGolongan = "5", KodeBidang = "04", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "002", UraianBarang = "Jaringan Listrik Gedung B" },
 
-                // === KODE BARANG di Golongan 6 (Aset Tetap Lainnya) ===
                 new KodeBarang { Id = 140, KodeGolongan = "6", KodeBidang = "01", KodeKelompok = "00", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Buku dan Perpustakaan" },
                 new KodeBarang { Id = 141, KodeGolongan = "6", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "00", KodeBarangValue = "000", UraianBarang = "Buku" },
                 new KodeBarang { Id = 142, KodeGolongan = "6", KodeBidang = "01", KodeKelompok = "01", KodeSubKelompok = "01", KodeBarangValue = "000", UraianBarang = "Buku Umum" },

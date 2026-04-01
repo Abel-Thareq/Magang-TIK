@@ -31,7 +31,6 @@ namespace SiBMN.Controllers.Api
             public string? LinkGambar { get; set; }
         }
 
-        // POST: api/detailpengajuanapi
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DetailRequest model)
         {
@@ -65,7 +64,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Barang berhasil ditambahkan!", id = detail.IdDetPengajuan });
         }
 
-        // PUT: api/detailpengajuanapi/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] DetailRequest model)
         {
@@ -90,7 +88,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Data barang berhasil diperbarui!" });
         }
 
-        // GET: api/detailpengajuanapi/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -122,7 +119,6 @@ namespace SiBMN.Controllers.Api
             });
         }
 
-        // DELETE: api/detailpengajuanapi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -133,7 +129,6 @@ namespace SiBMN.Controllers.Api
             _context.DetailPengajuans.Remove(detail);
             await _context.SaveChangesAsync();
 
-            // Re-order priorities
             var remaining = await _context.DetailPengajuans
                 .Where(d => d.IdPengajuan == pengajuanId)
                 .OrderBy(d => d.NoPrioritas)
@@ -149,7 +144,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Barang berhasil dihapus!" });
         }
 
-        // POST: api/detailpengajuanapi/5/moveup
         [HttpPost("{id}/moveup")]
         public async Task<IActionResult> MoveUp(int id)
         {
@@ -172,7 +166,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Prioritas berhasil dinaikkan" });
         }
 
-        // POST: api/detailpengajuanapi/5/movedown
         [HttpPost("{id}/movedown")]
         public async Task<IActionResult> MoveDown(int id)
         {
@@ -199,7 +192,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = "Prioritas berhasil diturunkan" });
         }
 
-        // GET: api/detailpengajuanapi/dropdowns
         [HttpGet("dropdowns")]
         public async Task<IActionResult> GetDropdowns()
         {
@@ -212,7 +204,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { gedungs });
         }
 
-        // GET: api/detailpengajuanapi/kodebarangs?golongan=3&bidang=01&kelompok=01&subKelompok=01&search=laptop
         [HttpGet("kodebarangs")]
         public async Task<IActionResult> GetKodeBarangs(
             [FromQuery] string? golongan,
@@ -267,7 +258,6 @@ namespace SiBMN.Controllers.Api
             }
         }
 
-        // PATCH: api/detailpengajuanapi/5/toggle-exclude
         [HttpPatch("{id}/toggle-exclude")]
         public async Task<IActionResult> ToggleExclude(int id)
         {

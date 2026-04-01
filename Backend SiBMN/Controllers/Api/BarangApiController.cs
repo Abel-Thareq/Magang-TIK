@@ -15,7 +15,6 @@ namespace SiBMN.Controllers.Api
             _context = context;
         }
 
-        // GET: api/BarangApi/Search?term=laptop
         [HttpGet("Search")]
         public async Task<IActionResult> Search(string term)
         {
@@ -39,7 +38,6 @@ namespace SiBMN.Controllers.Api
             return Ok(results);
         }
 
-        // GET: api/BarangApi/GetRuangs?gedung=Gedung A
         [HttpGet("GetRuangs")]
         public async Task<IActionResult> GetRuangs(string gedung)
         {

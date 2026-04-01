@@ -3,12 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, formatRupiah, formatDate } from '../../api/api';
 
-// === Progress Tracker Component (Snake / Serpentine Layout) ===
 function ProgressTracker({ pengajuan, roleId }) {
     const status = (pengajuan.status || '').toLowerCase();
     const isBmnRole = roleId === 4 || roleId === 5; // Tim BMN or Pimpinan Tim BMN
 
-    // Build stages dynamically based on role
     const stages = [];
     stages.push({ key: 'operator', label: 'Operator Unit Kerja', date: pengajuan.submittedAt });
     stages.push({ key: 'pimpinan_unit', label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt });
@@ -20,15 +18,11 @@ function ProgressTracker({ pengajuan, roleId }) {
     }
     stages.push({ key: 'kabag_umum', label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt });
 
-    // Index of Tim BMN in stages = 4
-    // Index of Pimpinan BMN (if BMN role) = 5
-    // Index of Kabag Umum = isBmnRole ? 6 : 5
     const timBmnIdx = 4;
     const pimpinanBmnIdx = isBmnRole ? 5 : -1;
     const kabagIdx = isBmnRole ? 6 : 5;
     const lastStageIdx = stages.length - 1;
 
-    // Row 1: first 5 nodes (up to Tim BMN), Row 2: remaining (after Tim BMN)
     const row1 = stages.slice(0, 5);
     const row2 = stages.slice(5); // 1 item (non-BMN) or 2 items (BMN)
 
@@ -36,37 +30,30 @@ function ProgressTracker({ pengajuan, roleId }) {
     const timBmnCompleted = status === 'menunggu kabag umum' || status === 'selesai';
 
     const getStageStatus = (idx) => {
-        // Tim Kerja BMN (idx 4)
         if (idx === timBmnIdx) {
             if (isBmnRole) {
-                // For BMN roles: Tim BMN is completed when status reaches reviewed or beyond
                 if (['reviewed', 'menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
                 if (status === 'review') return 'active';
                 if (status === 'menunggu tim bmn') return 'current';
                 return idx <= 3 ? 'upcoming' : 'upcoming';
             } else {
-                // For non-BMN: Tim BMN covers review+reviewed combined
                 if (timBmnCompleted || status === 'selesai') return 'completed';
                 if (isInTimBmn) return 'active';
                 if (status === 'menunggu tim bmn') return 'current';
                 return 'upcoming';
             }
         }
-        // Pimpinan Tim BMN (idx 5, only for BMN roles)
         if (isBmnRole && idx === pimpinanBmnIdx) {
             if (['menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
             if (status === 'reviewed') return 'current';
             if (['review', 'menunggu tim bmn'].includes(status)) return 'upcoming';
-            // Check if we're past it
             return 'upcoming';
         }
-        // Kabag Umum
         if (idx === kabagIdx) {
             if (status === 'selesai') return 'completed';
             if (status === 'menunggu kabag umum') return 'current';
             return 'upcoming';
         }
-        // General stages (0-3)
         const stageOrder = {
             'draft': -1,
             'menunggu pimpinan unit': 0,
@@ -81,7 +68,6 @@ function ProgressTracker({ pengajuan, roleId }) {
             (_, si) => si === idx
         )] ?? idx;
         if (idx < 4) {
-            // Simple: compare idx to where we are
             const statusProgress = {
                 'draft': -1,
                 'menunggu pimpinan unit': 0,
@@ -157,7 +143,6 @@ function ProgressTracker({ pengajuan, roleId }) {
         );
     };
 
-    // Curve connects Tim BMN (last row1 node) to first row2 node
     const firstRow2Idx = 5; // index in stages array
     const curveCol = lineColor(timBmnIdx, firstRow2Idx);
 
@@ -257,7 +242,6 @@ function ProgressTracker({ pengajuan, roleId }) {
     );
 }
 
-// === Main Component ===
 export default function PengajuanDetails() {
     const { id } = useParams();
     const { user } = useAuth();
@@ -278,14 +262,12 @@ export default function PengajuanDetails() {
 
     useEffect(() => { loadData(); }, [id]);
 
-    // Operator: submit draft
     const handleSubmit = async () => {
         if (!confirm('Yakin ingin mengajukan pengajuan ini?')) return;
         const res = await apiPost(`/PengajuanApi/${id}/submit`);
         if (res) { setMsg(res.message); loadData(); }
     };
 
-    // Generic approve/reject handler
     const handleStatusChange = async (status, confirmMsg) => {
         if (!confirm(confirmMsg)) return;
         const res = await apiPatch(`/PengajuanApi/${id}/status`, {
@@ -296,10 +278,8 @@ export default function PengajuanDetails() {
         if (res) { setMsg(res.message || 'Status berhasil diperbarui'); loadData(); }
     };
 
-    // Tim BMN: finish review
     const handleFinishReview = () => handleStatusChange('Reviewed', 'Tandai review selesai?');
 
-    // Reviewer: toggle exclude
     const handleToggleExclude = async (detailId) => {
         const res = await apiPatch(`/DetailPengajuanApi/${detailId}/toggle-exclude`);
         if (res) { loadData(); }
@@ -329,13 +309,10 @@ export default function PengajuanDetails() {
     const isReviewer = isTimBmn && pengajuan.reviewedById === user?.userId;
     const isAdminUnit = user?.roleId === 1;
 
-    // Admin can edit during draft
     const canAdminEdit = isAdminUnit && statusLower === 'draft';
-    // Reviewer can edit during review
     const canReviewerEdit = isReviewer && statusLower === 'review';
     const canEdit = canAdminEdit || canReviewerEdit;
 
-    // Status badge rendering
     const statusBadge = () => {
         const map = {
             'draft': { label: 'Draft', bg: '#ffc107', color: '#000' },

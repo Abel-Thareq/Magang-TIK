@@ -18,7 +18,6 @@ namespace SiBMN.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // If already logged in, redirect to dashboard
             if (HttpContext.Session.GetInt32("UserId") != null)
             {
                 return RedirectToAction("Index", "Dashboard");
@@ -46,7 +45,6 @@ namespace SiBMN.Controllers
                 return View(model);
             }
 
-            // Set session
             HttpContext.Session.SetInt32("UserId", user.IdUser);
             HttpContext.Session.SetString("UserName", user.Nama);
             HttpContext.Session.SetString("UserEmail", user.Email);

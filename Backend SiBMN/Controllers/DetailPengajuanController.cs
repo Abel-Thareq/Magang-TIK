@@ -21,7 +21,6 @@ namespace SiBMN.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
-        // GET: DetailPengajuan/Create?pengajuanId=1
         public async Task<IActionResult> Create(int pengajuanId)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -39,7 +38,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // POST: DetailPengajuan/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DetailPengajuanCreateViewModel model)
@@ -48,7 +46,6 @@ namespace SiBMN.Controllers
 
             if (ModelState.IsValid)
             {
-                // Get next priority number
                 var maxPriority = await _context.DetailPengajuans
                     .Where(d => d.IdPengajuan == model.IdPengajuan)
                     .MaxAsync(d => (int?)d.NoPrioritas) ?? 0;
@@ -74,7 +71,6 @@ namespace SiBMN.Controllers
                 _context.DetailPengajuans.Add(detail);
                 await _context.SaveChangesAsync();
 
-                // Update total harga in pengajuan
                 await UpdateTotalHarga(model.IdPengajuan);
 
                 TempData["Success"] = "Barang berhasil ditambahkan!";
@@ -86,7 +82,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // GET: DetailPengajuan/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -118,7 +113,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // POST: DetailPengajuan/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, DetailPengajuanCreateViewModel model)
@@ -155,7 +149,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // POST: DetailPengajuan/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -169,7 +162,6 @@ namespace SiBMN.Controllers
             _context.DetailPengajuans.Remove(detail);
             await _context.SaveChangesAsync();
 
-            // Re-order priorities
             var remaining = await _context.DetailPengajuans
                 .Where(d => d.IdPengajuan == pengajuanId)
                 .OrderBy(d => d.NoPrioritas)
@@ -187,7 +179,6 @@ namespace SiBMN.Controllers
             return RedirectToAction("Details", "Pengajuan", new { id = pengajuanId });
         }
 
-        // POST: DetailPengajuan/MoveUp/5
         [HttpPost]
         public async Task<IActionResult> MoveUp(int id)
         {
@@ -212,7 +203,6 @@ namespace SiBMN.Controllers
             return RedirectToAction("Details", "Pengajuan", new { id = detail.IdPengajuan });
         }
 
-        // POST: DetailPengajuan/MoveDown/5
         [HttpPost]
         public async Task<IActionResult> MoveDown(int id)
         {
@@ -257,7 +247,6 @@ namespace SiBMN.Controllers
 
         private async Task PopulateDropdowns(int unitId)
         {
-            // Use KodeBarang (leaf-level items only) instead of MasterBarang
             var kodeBarangs = await _context.KodeBarangs
                 .Where(k => k.KodeBarangValue != "000") // Only leaf-level items
                 .OrderBy(k => k.KodeGolongan)
@@ -273,7 +262,6 @@ namespace SiBMN.Controllers
 
             ViewBag.Barangs = new SelectList(kodeBarangs, "Id", "Display");
 
-            // Get gedung list (distinct)
             var gedungs = await _context.RuangGedungs
                 .Select(r => r.NamaGedung)
                 .Distinct()

@@ -16,7 +16,6 @@ namespace SiBMN.Controllers.Api
             _context = context;
         }
 
-        // GET: api/JadwalApi?userId=1&bulan=2026-03
         [HttpGet]
         public async Task<IActionResult> GetEvents([FromQuery] int userId, [FromQuery] string? bulan)
         {
@@ -42,7 +41,6 @@ namespace SiBMN.Controllers.Api
             return Ok(events);
         }
 
-        // POST: api/JadwalApi
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] JadwalEventDto dto)
         {
@@ -60,7 +58,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { jadwal.Id, jadwal.Bulan, jadwal.Waktu, jadwal.Keterangan });
         }
 
-        // DELETE: api/JadwalApi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {

@@ -16,7 +16,6 @@ namespace SiBMN.Controllers.Api
             _context = context;
         }
 
-        // GET: api/KodeBarangApi — list all with filters
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? filterGolongan,
@@ -86,7 +85,6 @@ namespace SiBMN.Controllers.Api
             public string UraianBarang { get; set; } = string.Empty;
         }
 
-        // POST: api/KodeBarangApi
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] KodeBarangRequest model)
         {
@@ -116,7 +114,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = $"Kode barang {kodeBarang.KodeBarangLengkap} berhasil ditambahkan.", id = kodeBarang.Id });
         }
 
-        // PUT: api/KodeBarangApi/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] dynamic body)
         {
@@ -134,7 +131,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = $"Kode barang {kodeBarang.KodeBarangLengkap} berhasil diperbarui." });
         }
 
-        // DELETE: api/KodeBarangApi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -148,7 +144,6 @@ namespace SiBMN.Controllers.Api
             return Ok(new { message = $"Kode barang {kodeBarang.KodeBarangLengkap} berhasil dihapus." });
         }
 
-        // GET: api/KodeBarangApi/Golongan
         [HttpGet("Golongan")]
         public async Task<IActionResult> GetGolongan()
         {
@@ -162,7 +157,6 @@ namespace SiBMN.Controllers.Api
             return Ok(data);
         }
 
-        // GET: api/KodeBarangApi/Bidang?kodeGolongan=3
         [HttpGet("Bidang")]
         public async Task<IActionResult> GetBidang(string kodeGolongan)
         {
@@ -175,7 +169,6 @@ namespace SiBMN.Controllers.Api
             return Ok(data);
         }
 
-        // GET: api/KodeBarangApi/Kelompok?kodeGolongan=3&kodeBidang=01
         [HttpGet("Kelompok")]
         public async Task<IActionResult> GetKelompok(string kodeGolongan, string kodeBidang)
         {
@@ -188,7 +181,6 @@ namespace SiBMN.Controllers.Api
             return Ok(data);
         }
 
-        // GET: api/KodeBarangApi/SubKelompok?kodeGolongan=3&kodeBidang=01&kodeKelompok=01
         [HttpGet("SubKelompok")]
         public async Task<IActionResult> GetSubKelompok(string kodeGolongan, string kodeBidang, string kodeKelompok)
         {
@@ -201,7 +193,6 @@ namespace SiBMN.Controllers.Api
             return Ok(data);
         }
 
-        // GET: api/KodeBarangApi/GetById/5
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(int id)
         {

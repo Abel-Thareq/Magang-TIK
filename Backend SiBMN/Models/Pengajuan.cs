@@ -58,31 +58,25 @@ namespace SiBMN.Models
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
-        // === Per-stage approval tracking ===
 
-        // Stage 1: Operator submits
         [Column("submitted_at")]
         public DateTime? SubmittedAt { get; set; }
 
-        // Stage 2: Pimpinan Unit Kerja
         [Column("pimpinan_unit_approved_by")]
         public int? PimpinanUnitApprovedBy { get; set; }
         [Column("pimpinan_unit_approved_at")]
         public DateTime? PimpinanUnitApprovedAt { get; set; }
 
-        // Stage 3: WR BPKU
         [Column("wr_bpku_approved_by")]
         public int? WrBpkuApprovedBy { get; set; }
         [Column("wr_bpku_approved_at")]
         public DateTime? WrBpkuApprovedAt { get; set; }
 
-        // Stage 4: Kabiro BPKU
         [Column("kabiro_bpku_approved_by")]
         public int? KabiroBpkuApprovedBy { get; set; }
         [Column("kabiro_bpku_approved_at")]
         public DateTime? KabiroBpkuApprovedAt { get; set; }
 
-        // Stage 5 & 6: Tim BMN review + Pimpinan BMN approve
         [Column("reviewed_by")]
         public int? ReviewedBy { get; set; }
         [Column("reviewed_at")]
@@ -92,13 +86,11 @@ namespace SiBMN.Models
         [Column("approved_at")]
         public DateTime? ApprovedAt { get; set; }
 
-        // Stage 7: Kabag Umum
         [Column("kabag_umum_approved_by")]
         public int? KabagUmumApprovedBy { get; set; }
         [Column("kabag_umum_approved_at")]
         public DateTime? KabagUmumApprovedAt { get; set; }
 
-        // Navigation
         [ForeignKey("UnitId")]
         public Unit? Unit { get; set; }
 

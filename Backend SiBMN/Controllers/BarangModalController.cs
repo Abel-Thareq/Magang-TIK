@@ -30,7 +30,6 @@ namespace SiBMN.Controllers
                 return RedirectToAction("Index", "Dashboard");
             }
 
-            // Only show items at "Kode Barang" level (KodeBarangValue != "000")
             var query = _context.KodeBarangs
                 .Where(k => k.KodeBarangValue != "000")
                 .AsQueryable();
@@ -52,7 +51,6 @@ namespace SiBMN.Controllers
                 .ThenBy(k => k.KodeBarangValue)
                 .ToListAsync();
 
-            // Pass filter values to view
             ViewBag.FilterGolongan = filterGolongan;
             ViewBag.FilterBidang = filterBidang;
             ViewBag.FilterKelompok = filterKelompok;

@@ -39,7 +39,6 @@ namespace SiBMN.Models
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
-        // Navigation
         [ForeignKey("RoleId")]
         public Role? Role { get; set; }
 

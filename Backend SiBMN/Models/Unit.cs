@@ -24,7 +24,6 @@ namespace SiBMN.Models
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
-        // Navigation
         public ICollection<User> Users { get; set; } = new List<User>();
         public ICollection<Pengajuan> Pengajuans { get; set; } = new List<Pengajuan>();
         public ICollection<StokPersediaan> StokPersediaans { get; set; } = new List<StokPersediaan>();

@@ -12,7 +12,6 @@ export default function DetailPengajuanEdit() {
     const [loading, setLoading] = useState(false);
     const [dataLoading, setDataLoading] = useState(true);
 
-    // Barang selection with cascading filter
     const [barangs, setBarangs] = useState([]);
     const [barangSearch, setBarangSearch] = useState('');
     const [barangLoading, setBarangLoading] = useState(false);

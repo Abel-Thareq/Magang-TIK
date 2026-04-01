@@ -71,7 +71,6 @@ namespace SiBMN.Controllers
                 .ThenBy(k => k.KodeBarangValue)
                 .ToListAsync();
 
-            // Pass filter values to view
             ViewBag.FilterGolongan = filterGolongan;
             ViewBag.FilterBidang = filterBidang;
             ViewBag.FilterKelompok = filterKelompok;
@@ -104,7 +103,6 @@ namespace SiBMN.Controllers
                 UraianBarang = model.UraianBarang
             };
 
-            // Check for duplicate
             var exists = await _context.KodeBarangs.AnyAsync(k =>
                 k.KodeGolongan == kodeBarang.KodeGolongan &&
                 k.KodeBidang == kodeBarang.KodeBidang &&

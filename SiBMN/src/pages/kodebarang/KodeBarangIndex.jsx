@@ -7,7 +7,6 @@ export default function KodeBarangIndex() {
     const [activeTab, setActiveTab] = useState('Golongan');
     const [msg, setMsg] = useState({ text: '', type: '' });
 
-    // Filters
     const [filterGolongan, setFilterGolongan] = useState('');
     const [filterBidang, setFilterBidang] = useState('');
     const [filterKelompok, setFilterKelompok] = useState('');
@@ -15,18 +14,15 @@ export default function KodeBarangIndex() {
     const [filterLevel, setFilterLevel] = useState('');
     const [searchText, setSearchText] = useState('');
 
-    // Cascading dropdown data
     const [golongans, setGolongans] = useState([]);
     const [bidangs, setBidangs] = useState([]);
     const [kelompoks, setKelompoks] = useState([]);
     const [subKelompoks, setSubKelompoks] = useState([]);
 
-    // Create form
     const [createForm, setCreateForm] = useState({
         kodeGolongan: '', kodeBidang: '', kodeKelompok: '', kodeSubKelompok: '', kodeBarangValue: '', uraianBarang: ''
     });
 
-    // Edit modal
     const [editItem, setEditItem] = useState(null);
     const [editUraian, setEditUraian] = useState('');
 
@@ -50,7 +46,6 @@ export default function KodeBarangIndex() {
         apiGet('/KodeBarangApi/Golongan').then(res => res && setGolongans(res));
     }, []);
 
-    // Cascading for filter
     const handleFilterGolonganChange = (val) => {
         setFilterGolongan(val);
         setFilterBidang(''); setFilterKelompok(''); setFilterSubKelompok('');
@@ -72,7 +67,6 @@ export default function KodeBarangIndex() {
         if (val) apiGet(`/KodeBarangApi/SubKelompok?kodeGolongan=${filterGolongan}&kodeBidang=${filterBidang}&kodeKelompok=${val}`).then(r => r && setSubKelompoks(r));
     };
 
-    // Cascading for create form
     const [cGolongans, setCGolongans] = useState([]);
     const [cBidangs, setCBidangs] = useState([]);
     const [cKelompoks, setCKelompoks] = useState([]);

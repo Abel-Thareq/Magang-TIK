@@ -1,10 +1,8 @@
-﻿// Si BMN - Global JavaScript
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('show');
 }
 
-// Close sidebar on click outside (mobile)
 document.addEventListener('click', function (e) {
     const sidebar = document.getElementById('sidebar');
     const toggleBtns = document.querySelectorAll('.sidebar-toggle');
@@ -19,7 +17,6 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Format currency
 function formatRupiah(angka) {
     var number_string = angka.toString().replace(/[^,\d]/g, ''),
         split = number_string.split(','),
@@ -35,7 +32,6 @@ function formatRupiah(angka) {
     return 'Rp ' + rupiah + (split[1] !== undefined ? ',' + split[1] : '');
 }
 
-// Auto-calculate jumlah harga
 function calculateTotal() {
     var volume = parseFloat(document.getElementById('JumlahDiminta')?.value) || 0;
     var harga = parseFloat(document.getElementById('HargaSatuan')?.value) || 0;
@@ -46,7 +42,6 @@ function calculateTotal() {
     }
 }
 
-// Handle asal barang radio buttons
 function handleAsalBarang() {
     var asalBarang = document.querySelector('input[name="AsalBarang"]:checked')?.value;
     var importField = document.getElementById('importField');
@@ -66,7 +61,6 @@ function handleAsalBarang() {
     }
 }
 
-// Filter ruang by gedung
 function filterRuangByGedung() {
     var gedung = document.getElementById('gedungSelect')?.value;
     var ruangSelect = document.getElementById('IdRuang');
@@ -86,7 +80,6 @@ function filterRuangByGedung() {
         });
 }
 
-// Confirm delete
 function confirmDelete(message) {
     return confirm(message || 'Apakah Anda yakin ingin menghapus data ini?');
 }

@@ -21,7 +21,6 @@ namespace SiBMN.Controllers
             return HttpContext.Session.GetInt32("UserId") != null;
         }
 
-        // GET: Pengajuan
         public async Task<IActionResult> Index()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -33,7 +32,6 @@ namespace SiBMN.Controllers
                 .Include(p => p.Unit)
                 .Include(p => p.DetailPengajuans);
 
-            // Admin Unit Kerja only sees their own unit's submissions
             if (roleId == 1)
             {
                 query = query.Where(p => p.UnitId == unitId);
@@ -43,7 +41,6 @@ namespace SiBMN.Controllers
             return View(pengajuans);
         }
 
-        // GET: Pengajuan/Create
         public async Task<IActionResult> Create()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -57,7 +54,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // POST: Pengajuan/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PengajuanCreateViewModel model)
@@ -91,7 +87,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // GET: Pengajuan/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -115,7 +110,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // POST: Pengajuan/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PengajuanCreateViewModel model)
@@ -143,7 +137,6 @@ namespace SiBMN.Controllers
             return View(model);
         }
 
-        // GET: Pengajuan/Details/5
         public async Task<IActionResult> Details(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
@@ -171,7 +164,6 @@ namespace SiBMN.Controllers
             return View(viewModel);
         }
 
-        // POST: Pengajuan/Submit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int id)
@@ -188,7 +180,6 @@ namespace SiBMN.Controllers
             return RedirectToAction("Details", new { id });
         }
 
-        // POST: Pengajuan/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

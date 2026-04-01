@@ -24,17 +24,14 @@ export default function PengajuanIndex() {
         if (res) loadData();
     };
 
-    // When Tim BMN clicks view: trigger Review status then navigate
     const handleTimBmnView = async (item) => {
         const s = (item.status || '').toLowerCase();
 
-        // If this pengajuan is being reviewed by someone else, block access
         if (s === 'review' && item.reviewedById !== user?.userId) {
             alert(`Pengajuan ini sedang direview oleh ${item.reviewedByName || 'Tim BMN lain'}. Anda tidak bisa melihat detail saat ini.`);
             return;
         }
 
-        // If Menunggu Tim BMN → auto trigger Review and lock to this user
         if (s === 'menunggu tim bmn') {
             await apiPatch(`/PengajuanApi/${item.idPengajuan}/status`, {
                 status: 'Review',
@@ -46,7 +43,6 @@ export default function PengajuanIndex() {
         navigate(`/pengajuan/${item.idPengajuan}`);
     };
 
-    // Helper to render status badge
     const renderStatus = (item) => {
         const s = (item.status || '').toLowerCase();
         const statusMap = {

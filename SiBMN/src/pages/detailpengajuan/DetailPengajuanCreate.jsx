@@ -12,7 +12,6 @@ export default function DetailPengajuanCreate() {
     const [ruangs, setRuangs] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Barang selection with cascading filter
     const [barangs, setBarangs] = useState([]);
     const [barangSearch, setBarangSearch] = useState('');
     const [barangLoading, setBarangLoading] = useState(false);

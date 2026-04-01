@@ -6,7 +6,6 @@ export default function BarangModalIndex() {
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState('');
 
-    // Filters
     const [filterGolongan, setFilterGolongan] = useState('');
     const [filterBidang, setFilterBidang] = useState('');
     const [filterKelompok, setFilterKelompok] = useState('');

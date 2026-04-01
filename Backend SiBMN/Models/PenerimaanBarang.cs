@@ -26,7 +26,6 @@ namespace SiBMN.Models
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
-        // Navigation
         [ForeignKey("IdPengajuan")]
         public Pengajuan? Pengajuan { get; set; }
     }

@@ -52,7 +52,6 @@ function WeekCalendar() {
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const dayLabels = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
 
-    // Get the Monday of the current week
     const getWeekStart = (date) => {
         const d = new Date(date);
         const day = d.getDay();
@@ -87,7 +86,6 @@ function WeekCalendar() {
     const displayMonth = weekDays[3]; // Use middle of week for month name
     const monthKey = `${displayMonth.getFullYear()}-${String(displayMonth.getMonth() + 1).padStart(2, '0')}`;
 
-    // Fetch events from API
     const loadEvents = () => {
         if (!user?.userId) return;
         apiGet(`/JadwalApi?userId=${user.userId}&bulan=${monthKey}`)
