@@ -62,10 +62,7 @@ export default function Layout() {
                     <button className="sidebar-toggle d-lg-none" onClick={() => setSidebarOpen(true)}>
                         <i className="fas fa-bars"></i>
                     </button>
-                    <div className="search-bar">
-                        <i className="fas fa-search"></i>
-                        <input type="text" placeholder="Cari disini ..." />
-                    </div>
+                    <div></div>
                     <div className="topbar-right">
                         <div className="icon-btn"><i className="fas fa-cog"></i></div>
                         <div className="icon-btn">

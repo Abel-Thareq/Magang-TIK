@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiGet, apiPost, apiDelete, formatDate } from '../api/api';
@@ -39,6 +39,62 @@ function DonutChart({ data, total }) {
             <text x={cx} y={cy - 6} textAnchor="middle" fontSize="10" fill="#999" fontWeight="500">Total Aset</text>
             <text x={cx} y={cy + 14} textAnchor="middle" fontSize="22" fill="#333" fontWeight="700">{total}</text>
         </svg>
+    );
+}
+
+function AnimatedCounter({ value, duration = 1200 }) {
+    const [count, setCount] = useState(0);
+    const animRef = useRef(null);
+
+    useEffect(() => {
+        if (animRef.current) cancelAnimationFrame(animRef.current);
+        if (value === 0) { setCount(0); return; }
+
+        const startTime = performance.now();
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(eased * value));
+            if (progress < 1) {
+                animRef.current = requestAnimationFrame(animate);
+            } else {
+                setCount(value);
+            }
+        };
+
+        animRef.current = requestAnimationFrame(animate);
+        return () => animRef.current && cancelAnimationFrame(animRef.current);
+    }, [value, duration]);
+
+    return <>{count}</>;
+}
+
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return 'Selamat Pagi';
+    if (hour >= 11 && hour < 15) return 'Selamat Siang';
+    if (hour >= 15 && hour < 18) return 'Selamat Sore';
+    return 'Selamat Malam';
+}
+
+function DashboardSkeleton() {
+    return (
+        <div className="dash-layout">
+            <div className="dash-left">
+                <div className="skeleton-box" style={{ height: '180px', borderRadius: '16px' }} />
+                <div className="dash-middle-row">
+                    <div className="skeleton-box" style={{ height: '350px', borderRadius: '16px' }} />
+                    <div className="skeleton-box" style={{ height: '350px', borderRadius: '16px' }} />
+                </div>
+            </div>
+            <div className="dash-right">
+                <div className="skeleton-box" style={{ height: '90px', borderRadius: '16px' }} />
+                <div className="skeleton-box" style={{ height: '90px', borderRadius: '16px' }} />
+                <div className="skeleton-box" style={{ height: '90px', borderRadius: '16px' }} />
+                <div className="skeleton-box" style={{ height: '250px', borderRadius: '16px' }} />
+            </div>
+        </div>
     );
 }
 
@@ -181,14 +237,17 @@ function WeekCalendar() {
 
 export default function Dashboard() {
     const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalPengajuan: 0, draftCount: 0, approvedCount: 0, totalBarang: 0,
         totalAset: 0, asetPerGolongan: [], recentPengajuan: []
     });
 
     useEffect(() => {
+        setLoading(true);
         apiGet(`/DashboardApi/stats?unitId=${user?.unitId}&roleId=${user?.roleId}`)
-            .then(data => data && setStats(data));
+            .then(data => data && setStats(data))
+            .finally(() => setLoading(false));
     }, [user]);
 
     const getTimeDiff = (dateStr) => {
@@ -209,13 +268,14 @@ export default function Dashboard() {
 
     return (
         <div className="fade-in">
+            {loading ? <DashboardSkeleton /> : (
             <div className="dash-layout">
                 {/* LEFT COLUMN */}
                 <div className="dash-left">
                     {/* Welcome Banner */}
                     <div className="dash-welcome-banner">
                         <div className="dash-welcome-text">
-                            <h2>Halo, {user?.nama?.split(' ')[0]}!!</h2>
+                            <h2>{getGreeting()}, {user?.nama?.split(' ')[0]}!!</h2>
                             <p>Kelola pengajuan barang modal unit kerja disini</p>
                             <Link to="/pengajuan/create" className="dash-welcome-btn">
                                 <i className="fas fa-plus-circle"></i> Buat Pengajuan
@@ -266,7 +326,7 @@ export default function Dashboard() {
                             <i className="fas fa-file-invoice"></i>
                         </div>
                         <div>
-                            <div className="dash-stat-value">{stats.totalPengajuan}</div>
+                            <div className="dash-stat-value"><AnimatedCounter value={stats.totalPengajuan} /></div>
                             <div className="dash-stat-label">Total Pengajuan</div>
                         </div>
                     </div>
@@ -276,7 +336,7 @@ export default function Dashboard() {
                             <i className="fas fa-edit"></i>
                         </div>
                         <div>
-                            <div className="dash-stat-value">{stats.draftCount}</div>
+                            <div className="dash-stat-value"><AnimatedCounter value={stats.draftCount} /></div>
                             <div className="dash-stat-label">Total Draf</div>
                         </div>
                     </div>
@@ -286,7 +346,7 @@ export default function Dashboard() {
                             <i className="fas fa-clipboard-check"></i>
                         </div>
                         <div>
-                            <div className="dash-stat-value">{stats.approvedCount}</div>
+                            <div className="dash-stat-value"><AnimatedCounter value={stats.approvedCount} /></div>
                             <div className="dash-stat-label">Total Diajukan</div>
                         </div>
                     </div>
@@ -294,6 +354,7 @@ export default function Dashboard() {
                     <WeekCalendar />
                 </div>
             </div>
+            )}
         </div>
     );
 }
