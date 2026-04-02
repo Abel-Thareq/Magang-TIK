@@ -432,7 +432,6 @@ C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\scope
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\scopedcss\projectbundle\SiBMN.bundle.scp.css
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\oendrbynt5-{0}-22vk556v81-22vk556v81.gz
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\r93p1db48i-{0}-61n19gt1b8-61n19gt1b8.gz
-C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\pqr3hg43ij-{0}-kfdx8zgnex-kfdx8zgnex.gz
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\cst8o9xnne-{0}-bqjiyaj88i-bqjiyaj88i.gz
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\zfzday2ksk-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\mh3vswh70h-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -505,3 +504,4 @@ C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\refin
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\SiBMN.pdb
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\SiBMN.genruntimeconfig.cache
 C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\ref\SiBMN.dll
+C:\Users\workpro\Documents\Abel\Magang TIK\Backend SiBMN\obj\Debug\net10.0\compressed\pqr3hg43ij-{0}-d3dvnl8x5o-d3dvnl8x5o.gz

@@ -195,14 +195,16 @@ export default function Dashboard() {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         const now = new Date();
-        const diffMs = now - d;
-        const diffH = Math.floor(diffMs / (1000 * 60 * 60));
-        if (diffH < 1) return 'Baru saja';
-        if (diffH < 24) return `${diffH} jam lalu`;
-        const diffD = Math.floor(diffH / 24);
-        if (diffD === 1) return 'Kemarin';
-        if (diffD < 7) return `${diffD} hari lalu`;
-        return formatDate(dateStr);
+        const isSameDay = d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const isYesterday = d.getDate() === yesterday.getDate() && d.getMonth() === yesterday.getMonth() && d.getFullYear() === yesterday.getFullYear();
+
+        if (isSameDay) return 'Hari Ini';
+        if (isYesterday) return 'Kemarin';
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${hours}.${minutes}`;
     };
 
     return (
@@ -213,7 +215,7 @@ export default function Dashboard() {
                     {/* Welcome Banner */}
                     <div className="dash-welcome-banner">
                         <div className="dash-welcome-text">
-                            <h2>Hallo, {user?.nama?.split(' ')[0]}!!</h2>
+                            <h2>Halo, {user?.nama?.split(' ')[0]}!!</h2>
                             <p>Kelola pengajuan barang modal unit kerja disini</p>
                             <Link to="/pengajuan/create" className="dash-welcome-btn">
                                 <i className="fas fa-plus-circle"></i> Buat Pengajuan
@@ -247,7 +249,7 @@ export default function Dashboard() {
                                         <span className="dash-recent-time">{getTimeDiff(item.tanggalPengajuan)}</span>
                                         <span className="dash-recent-unit">{item.unitName}</span>
                                         <span className="dash-recent-type">{item.jenisPengajuan || 'Belanja Modal'}</span>
-                                        <span className={`dash-recent-badge ${item.status}`}>{item.status === 'draft' ? 'Draft' : 'Diajukan'}</span>
+                                        <span className="dash-recent-badge lihat-detail">Lihat Detail</span>
                                     </Link>
                                 )) : (
                                     <div className="text-center text-muted py-4" style={{ fontSize: '0.85rem' }}>Belum ada pengajuan</div>
@@ -280,7 +282,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="dash-stat-card">
-                        <div className="dash-stat-icon" style={{ background: 'linear-gradient(135deg, #3498DB, #5DADE2)' }}>
+                        <div className="dash-stat-icon" style={{ background: 'linear-gradient(135deg, #F57F17, #FFB300)' }}>
                             <i className="fas fa-clipboard-check"></i>
                         </div>
                         <div>

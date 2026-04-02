@@ -496,10 +496,56 @@ body {
 }
 
 /* ============ DASHBOARD ============ */
+
+/* Entrance Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.5s ease-out;
+}
+
 .dash-layout {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 24px;
+}
+
+/* Staggered animation for child elements */
+.dash-welcome-banner {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+.dash-middle-row .dash-card:nth-child(1) {
+    animation: fadeInUp 0.4s 0.1s ease-out both;
+}
+
+.dash-middle-row .dash-card:nth-child(2) {
+    animation: fadeInUp 0.4s 0.15s ease-out both;
+}
+
+.dash-right .dash-stat-card:nth-child(1) {
+    animation: fadeInUp 0.4s 0.05s ease-out both;
+}
+
+.dash-right .dash-stat-card:nth-child(2) {
+    animation: fadeInUp 0.4s 0.1s ease-out both;
+}
+
+.dash-right .dash-stat-card:nth-child(3) {
+    animation: fadeInUp 0.4s 0.15s ease-out both;
+}
+
+.dash-right .calendar-widget {
+    animation: fadeInUp 0.4s 0.2s ease-out both;
 }
 
 .dash-left {
@@ -524,7 +570,13 @@ body {
     display: flex;
     align-items: center;
     min-height: 180px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3), 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.dash-welcome-banner:hover {
+    box-shadow: 0 8px 30px rgba(255, 193, 7, 0.35), 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .dash-welcome-text h2 {
@@ -580,7 +632,13 @@ body {
     background: white;
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.dash-card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
 }
 
 .dash-card-title {
@@ -629,12 +687,13 @@ body {
     display: grid;
     grid-template-columns: 80px 1.5fr 1fr auto;
     align-items: center;
-    padding: 16px 0;
+    padding: 16px 8px;
     border-bottom: 1px solid var(--border-color);
     font-size: 13px;
     text-decoration: none;
     color: var(--text-primary);
-    transition: background 0.2s;
+    transition: background 0.2s ease, padding-left 0.2s ease;
+    border-radius: 8px;
 }
 
 .dash-recent-item:last-child {
@@ -642,7 +701,8 @@ body {
 }
 
 .dash-recent-item:hover {
-    background: #f8fafc;
+    background: #fef9c3;
+    padding-left: 12px;
 }
 
 .dash-recent-time {
@@ -655,18 +715,23 @@ body {
 }
 
 .dash-recent-badge {
-    background-color: #bae6fd;
-    color: #0369a1;
-    padding: 6px 12px;
+    padding: 6px 16px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
     text-align: center;
+    white-space: nowrap;
 }
 
-.dash-recent-badge.draft {
-    background-color: #fef08a;
-    color: #854d0e;
+.dash-recent-badge.lihat-detail {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dash-recent-badge.lihat-detail:hover {
+    background-color: #bfdbfe;
 }
 
 /* Stat Cards */
@@ -677,7 +742,13 @@ body {
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.dash-stat-card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform: translateY(-3px);
 }
 
 .dash-stat-icon {
@@ -708,7 +779,13 @@ body {
     background: white;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.calendar-widget:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
 }
 
 .cal-header-section {
