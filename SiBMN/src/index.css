@@ -1465,450 +1465,140 @@ body {
     font-weight: 500;
 }
 
-/* ============ NEW DASHBOARD LAYOUT ============ */
-.dash-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 1.5rem;
-    align-items: start;
+/* ============ UI POLISH ============ */
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-/* Welcome Banner */
-.dash-welcome-banner {
-    background: linear-gradient(135deg, #FFC107 0%, #FFD54F 50%, #FFE082 100%);
-    border-radius: var(--radius-md);
-    padding: 2rem 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 160px;
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Sidebar polish */
+.sidebar {
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+}
+
+.menu-item {
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3);
 }
 
-.dash-welcome-banner::before {
-    content: '';
-    position: absolute;
-    bottom: -40px;
-    left: -20px;
-    width: 150px;
-    height: 150px;
-    background: rgba(255, 255, 255, 0.15);
+.menu-item.active {
+    box-shadow: inset 4px 0 0 0 var(--primary);
+}
+
+.menu-item.active i {
+    color: var(--primary-dark);
+}
+
+/* Topbar polish */
+.search-bar {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.search-bar:focus-within {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary);
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-}
-
-.dash-welcome-text {
-    position: relative;
-    z-index: 1;
-}
-
-.dash-welcome-text h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-
-.dash-welcome-text p {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 1rem;
-    font-weight: 400;
-}
-
-.dash-welcome-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #333;
-    color: white;
-    padding: 0.5rem 1.25rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.dash-welcome-btn:hover {
-    background: #555;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.dash-welcome-img {
-    height: 150px;
-    max-width: 200px;
-    object-fit: contain;
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
-}
-
-/* Dashboard Middle Row */
-.dash-middle-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-/* Dashboard Card */
-.dash-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    padding: 1.5rem;
-}
-
-.dash-card-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.25rem;
-}
-
-/* Aset Card */
-.dash-aset-content {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 1rem;
-}
-
-.dash-aset-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
     justify-content: center;
+    transition: background 0.2s, transform 0.15s;
 }
 
-.dash-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: var(--text-secondary);
+.icon-btn:hover {
+    background: var(--primary-50);
+    transform: scale(1.08);
 }
 
-.dash-legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.avatar {
+    transition: box-shadow 0.2s;
 }
 
-/* Recent Pengajuan */
-.dash-recent-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+.avatar:hover {
+    box-shadow: 0 0 0 3px var(--primary-200);
 }
 
-.dash-recent-item {
-    display: grid;
-    grid-template-columns: 80px 1fr 90px 70px;
-    gap: 0.5rem;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.2s;
-    font-size: 0.82rem;
+/* Table polish */
+.table-container {
+    transition: box-shadow 0.3s ease;
 }
 
-.dash-recent-item:last-child {
-    border-bottom: none;
-}
-
-.dash-recent-item:hover {
-    background: rgba(0, 0, 0, 0.02);
-}
-
-.dash-recent-time {
-    font-weight: 700;
-    color: var(--text-primary);
-    font-size: 0.8rem;
-}
-
-.dash-recent-unit {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-}
-
-.dash-recent-type {
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-}
-
-.dash-recent-badge {
-    padding: 0.2rem 0.6rem;
-    border-radius: 50px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-align: center;
-}
-
-.dash-recent-badge.draft {
-    background: #FFF3E0;
-    color: #E65100;
-}
-
-.dash-recent-badge.approved {
-    background: #fefce8;
-    color: #ca8a04;
-}
-
-/* Right Column Stat Cards */
-.dash-right {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.dash-stat-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: var(--transition);
-}
-
-.dash-stat-card:hover {
-    transform: translateY(-2px);
+.table-container:hover {
     box-shadow: var(--shadow-md);
 }
 
-.dash-stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: white;
-    flex-shrink: 0;
+.table tbody tr {
+    transition: background 0.15s ease;
 }
 
-.dash-stat-value {
-    font-size: 1.75rem;
-    font-weight: 800;
+.table tbody tr:hover {
+    background: var(--primary-50) !important;
+}
+
+/* Button microinteractions */
+.btn-sm-action {
+    transition: all 0.2s ease;
+}
+
+.btn-sm-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn-sm-action:active {
+    transform: translateY(0);
+}
+
+/* Logout button polish */
+.logout-btn {
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+.logout-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(68, 119, 206, 0.35);
+}
+
+/* Form inputs polish */
+.form-control:hover,
+.form-select:hover {
+    border-color: var(--primary-200);
+}
+
+/* Badge polish */
+.badge-status {
+    transition: transform 0.15s ease;
+}
+
+.badge-status:hover {
+    transform: scale(1.05);
+}
+
+/* Selection color */
+::selection {
+    background: var(--primary-200);
     color: var(--text-primary);
-    line-height: 1.1;
-}
-
-.dash-stat-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-/* Mini Calendar */
-.dash-calendar {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    padding: 1.25rem;
-    border-top: 3px solid var(--accent);
-}
-
-.dash-cal-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-
-.dash-cal-add-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    color: #333;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.dash-cal-add-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(255, 179, 0, 0.4);
-}
-
-.dash-cal-month-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    cursor: pointer;
-}
-
-.dash-cal-month-label i:first-child {
-    color: var(--text-muted);
-}
-
-.dash-cal-week-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    margin-bottom: 0.35rem;
-}
-
-.dash-cal-day-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.dash-cal-week-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-}
-
-.dash-cal-arrow {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    cursor: pointer;
-    padding: 0.4rem 0.5rem;
-    transition: color 0.2s;
-    flex-shrink: 0;
-}
-
-.dash-cal-arrow:hover {
-    color: var(--text-primary);
-}
-
-.dash-cal-date {
-    flex: 1;
-    text-align: center;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    padding: 0.4rem 0;
-    cursor: default;
-}
-
-.dash-cal-date.today {
-    background: var(--primary);
-    color: white;
-    font-weight: 700;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 30px;
-}
-
-.dash-cal-date.sunday {
-    color: #E74C3C;
-    font-weight: 600;
-}
-
-/* Calendar Add Event Form */
-.dash-cal-add-form {
-    display: flex;
-    gap: 0.4rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-color);
-    animation: fadeInUp 0.3s ease-out;
-}
-
-.dash-cal-add-form input {
-    flex: 1;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.78rem;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-}
-
-.dash-cal-add-form input:focus {
-    border-color: var(--accent);
-}
-
-.dash-cal-add-form input[type="time"] {
-    flex: 0 0 80px;
-}
-
-.dash-cal-add-form button {
-    background: var(--accent);
-    border: none;
-    border-radius: 6px;
-    padding: 0.35rem 0.6rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    color: #333;
-    font-weight: 700;
-}
-
-/* Calendar Events */
-.dash-cal-events {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.dash-cal-event {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    font-size: 0.82rem;
-}
-
-.dash-cal-event:last-child {
-    border-bottom: none;
-}
-
-.dash-cal-event-time {
-    font-weight: 700;
-    color: var(--text-primary);
-    min-width: 38px;
-    font-size: 0.82rem;
-}
-
-.dash-cal-event-text {
-    flex: 1;
-    color: var(--text-secondary);
-}
-
-.dash-cal-event-del {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 0.65rem;
-    padding: 2px 4px;
-    transition: color 0.2s;
-}
-
-.dash-cal-event-del:hover {
-    color: #E74C3C;
 }
 
 /* Dashboard Responsive */
