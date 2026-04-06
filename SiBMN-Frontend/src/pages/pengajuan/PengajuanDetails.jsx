@@ -75,28 +75,41 @@ function ProgressTracker({ pengajuan, roleId }) {
         </div>
     );
 
-    useEffect(() => {
-        const raf = requestAnimationFrame(() => {
-            if (!containerRef.current) return;
-            const cR = containerRef.current.getBoundingClientRect();
-            const paths = [];
-            for (let r = 0; r < rows.length - 1; r++) {
-                const side = r % 2 === 0 ? 'right' : 'left';
-                const fromEl = circleRefs.current[`r${r}-${side}`];
-                const toEl = circleRefs.current[`r${r + 1}-${side}`];
-                if (fromEl && toEl) {
-                    const fR = fromEl.getBoundingClientRect();
-                    const tR = toEl.getBoundingClientRect();
-                    const fX = fR.left + 13 - cR.left, fY = fR.top + 13 - cR.top;
-                    const tX = tR.left + 13 - cR.left, tY = tR.top + 13 - cR.top;
-                    const arc = 40;
-                    const cpX = side === 'right' ? Math.max(fX, tX) + arc : Math.min(fX, tX) - arc;
-                    paths.push({ d: `M ${fX} ${fY} C ${cpX} ${fY}, ${cpX} ${tY}, ${tX} ${tY}`, color: curveColor(r) });
-                }
+    const calcCurves = () => {
+        if (!containerRef.current) return;
+        const cR = containerRef.current.getBoundingClientRect();
+        const paths = [];
+        for (let r = 0; r < rows.length - 1; r++) {
+            const side = r % 2 === 0 ? 'right' : 'left';
+            const fromEl = circleRefs.current[`r${r}-${side}`];
+            const toEl = circleRefs.current[`r${r + 1}-${side}`];
+            if (fromEl && toEl) {
+                const fR = fromEl.getBoundingClientRect();
+                const tR = toEl.getBoundingClientRect();
+                const fX = fR.left + 13 - cR.left, fY = fR.top + 13 - cR.top;
+                const tX = tR.left + 13 - cR.left, tY = tR.top + 13 - cR.top;
+                const arc = 50;
+                const cpX = side === 'right' ? Math.max(fX, tX) + arc : Math.min(fX, tX) - arc;
+                paths.push({ d: `M ${fX} ${fY} C ${cpX} ${fY}, ${cpX} ${tY}, ${tX} ${tY}`, color: curveColor(r) });
             }
-            setCurvePaths(paths);
-        });
-        return () => cancelAnimationFrame(raf);
+        }
+        setCurvePaths(paths);
+    };
+
+    useEffect(() => {
+        const raf = requestAnimationFrame(calcCurves);
+        const container = containerRef.current;
+        let ro;
+        if (container) {
+            ro = new ResizeObserver(() => requestAnimationFrame(calcCurves));
+            ro.observe(container);
+        }
+        window.addEventListener('resize', calcCurves);
+        return () => {
+            cancelAnimationFrame(raf);
+            if (ro) ro.disconnect();
+            window.removeEventListener('resize', calcCurves);
+        };
     }, [status]);
 
     const getWaitingText = () => ({
@@ -183,7 +196,7 @@ function ProgressTracker({ pengajuan, roleId }) {
                     {curvePaths.length > 0 && (
                         <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
                             {curvePaths.map((cp, i) => (
-                                <path key={i} d={cp.d} stroke={cp.color} strokeWidth="3" fill="none" strokeLinecap="round" />
+                                <path key={i} d={cp.d} stroke={cp.color} strokeWidth="3.5" fill="none" strokeLinecap="round" />
                             ))}
                         </svg>
                     )}
