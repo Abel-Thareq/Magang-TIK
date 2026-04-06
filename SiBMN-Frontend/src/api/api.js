@@ -208,20 +208,20 @@ function routeMock(url, method, data) {
         }
         return { message: 'Status berhasil diperbarui' };
     }
-    if (url.match(/^\/api\/PengajuanApi\/\d+$/) && method === 'GET') {
+    if (url.match(/^\/api\/PengajuanApi\/\d+(\?.*)?$/) && method === 'GET') {
         const id = Number(url.split('/')[3].split('?')[0]);
         const p = MOCK_PENGAJUANS.find(x => x.idPengajuan === id);
         const details = MOCK_DETAILS.filter(d => d.idPengajuan === id);
         return p ? { pengajuan: p, details } : null;
     }
-    if (url.match(/^\/api\/PengajuanApi\/\d+$/) && method === 'PUT') {
-        const id = Number(url.split('/')[3]);
+    if (url.match(/^\/api\/PengajuanApi\/\d+(\?.*)?$/) && method === 'PUT') {
+        const id = Number(url.split('/')[3].split('?')[0]);
         const p = MOCK_PENGAJUANS.find(x => x.idPengajuan === id);
         if (p) Object.assign(p, data);
         return { message: 'Updated' };
     }
-    if (url.match(/^\/api\/PengajuanApi\/\d+$/) && method === 'DELETE') {
-        const id = Number(url.split('/')[3]);
+    if (url.match(/^\/api\/PengajuanApi\/\d+(\?.*)?$/) && method === 'DELETE') {
+        const id = Number(url.split('/')[3].split('?')[0]);
         MOCK_PENGAJUANS = MOCK_PENGAJUANS.filter(x => x.idPengajuan !== id);
         MOCK_DETAILS = MOCK_DETAILS.filter(d => d.idPengajuan !== id);
         return { message: 'Deleted' };
@@ -281,11 +281,11 @@ function routeMock(url, method, data) {
         }
         return { message: 'Moved' };
     }
-    if (url.match(/^\/api\/DetailPengajuanApi\/\d+$/) && method === 'GET') {
-        const id = Number(url.split('/')[3]);
+    if (url.match(/^\/api\/DetailPengajuanApi\/\d+(\?.*)?$/) && method === 'GET') {
+        const id = Number(url.split('/')[3].split('?')[0]);
         return MOCK_DETAILS.find(x => x.idDetPengajuan === id) || null;
     }
-    if (url.match(/^\/api\/DetailPengajuanApi\/\d+$/) && method === 'PUT') {
+    if (url.match(/^\/api\/DetailPengajuanApi\/\d+(\?.*)?$/) && method === 'PUT') {
         const id = Number(url.split('/')[3]);
         const d = MOCK_DETAILS.find(x => x.idDetPengajuan === id);
         if (d) {
@@ -300,7 +300,7 @@ function routeMock(url, method, data) {
         }
         return { message: 'Updated' };
     }
-    if (url.match(/^\/api\/DetailPengajuanApi\/\d+$/) && method === 'DELETE') {
+    if (url.match(/^\/api\/DetailPengajuanApi\/\d+(\?.*)?$/) && method === 'DELETE') {
         const id = Number(url.split('/')[3]);
         const d = MOCK_DETAILS.find(x => x.idDetPengajuan === id);
         MOCK_DETAILS = MOCK_DETAILS.filter(x => x.idDetPengajuan !== id);

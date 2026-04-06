@@ -1,114 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, formatRupiah, formatDate } from '../../api/api';
 
+const NODES_PER_ROW = 5;
+
 function ProgressTracker({ pengajuan, roleId }) {
     const status = (pengajuan.status || '').toLowerCase();
-    const isBmnRole = roleId === 4 || roleId === 5; // Tim BMN or Pimpinan Tim BMN
+    const containerRef = useRef(null);
+    const circleRefs = useRef({});
+    const [curvePaths, setCurvePaths] = useState([]);
 
-    const stages = [];
-    stages.push({ key: 'operator', label: 'Operator Unit Kerja', date: pengajuan.submittedAt });
-    stages.push({ key: 'pimpinan_unit', label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt });
-    stages.push({ key: 'wr_bpku', label: 'WR BPKU', date: pengajuan.wrBpkuApprovedAt });
-    stages.push({ key: 'kabiro_bpku', label: 'Kabiro BPKU', date: pengajuan.kabiroBpkuApprovedAt });
-    stages.push({ key: 'tim_bmn', label: 'Tim Kerja BMN', date: pengajuan.reviewedAt });
-    if (isBmnRole) {
-        stages.push({ key: 'pimpinan_bmn', label: 'Pimpinan Tim BMN', date: pengajuan.approvedAt });
+    const allStages = [
+        { label: 'Operator Unit Kerja', date: pengajuan.submittedAt },
+        { label: 'Pimpinan Unit Kerja', date: pengajuan.pimpinanUnitApprovedAt },
+        { label: 'WR BPKU', date: pengajuan.wrBpkuApprovedAt },
+        { label: 'Kabiro BPKU', date: pengajuan.kabiroBpkuApprovedAt },
+        { label: 'Tim Kerja BMN', date: pengajuan.reviewedAt },
+        { label: 'Ketua Tim Kerja BMN', date: pengajuan.approvedAt },
+        { label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt },
+        { label: 'Ketua Tim Bidang Perencanaan Anggaran', date: null },
+        { label: 'Kuasa Pengguna Anggaran (KPA)', date: null },
+    ];
+
+    const rows = [];
+    for (let i = 0; i < allStages.length; i += NODES_PER_ROW) {
+        rows.push(allStages.slice(i, Math.min(i + NODES_PER_ROW, allStages.length)));
     }
-    stages.push({ key: 'kabag_umum', label: 'Kabag Umum', date: pengajuan.kabagUmumApprovedAt });
 
-    const timBmnIdx = 4;
-    const pimpinanBmnIdx = isBmnRole ? 5 : -1;
-    const kabagIdx = isBmnRole ? 6 : 5;
-    const lastStageIdx = stages.length - 1;
-
-    const row1 = stages.slice(0, 5);
-    const row2 = stages.slice(5); // 1 item (non-BMN) or 2 items (BMN)
-
-    const isInTimBmn = ['review', 'reviewed', 'menunggu kabag umum'].includes(status);
-    const timBmnCompleted = status === 'menunggu kabag umum' || status === 'selesai';
-
-    const getStageStatus = (idx) => {
-        if (idx === timBmnIdx) {
-            if (isBmnRole) {
-                if (['reviewed', 'menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
-                if (status === 'review') return 'active';
-                if (status === 'menunggu tim bmn') return 'current';
-                return idx <= 3 ? 'upcoming' : 'upcoming';
-            } else {
-                if (timBmnCompleted || status === 'selesai') return 'completed';
-                if (isInTimBmn) return 'active';
-                if (status === 'menunggu tim bmn') return 'current';
-                return 'upcoming';
-            }
-        }
-        if (isBmnRole && idx === pimpinanBmnIdx) {
+    const getStatus = (gi) => {
+        if (gi === 4) {
             if (['menunggu kabag umum', 'selesai'].includes(status)) return 'completed';
-            if (status === 'reviewed') return 'current';
-            if (['review', 'menunggu tim bmn'].includes(status)) return 'upcoming';
+            if (['review', 'reviewed'].includes(status)) return 'active';
+            if (status === 'menunggu tim bmn') return 'current';
             return 'upcoming';
         }
-        if (idx === kabagIdx) {
+        if (gi === 5) {
+            if (status === 'selesai' || status === 'menunggu kabag umum') return 'completed';
+            if (status === 'reviewed') return 'current';
+            return 'upcoming';
+        }
+        if (gi === 6) {
             if (status === 'selesai') return 'completed';
             if (status === 'menunggu kabag umum') return 'current';
             return 'upcoming';
         }
-        const stageOrder = {
-            'draft': -1,
-            'menunggu pimpinan unit': 0,
-            'menunggu wr bpku': 1,
-            'menunggu kabiro bpku': 2,
-            'menunggu tim bmn': 3,
-            'review': 4, 'reviewed': 5, 'menunggu kabag umum': 6,
-            'selesai': 7,
-        };
-        const currentOrder = stageOrder[status] ?? -1;
-        const stageOrderVal = stageOrder[Object.keys(stageOrder).find(
-            (_, si) => si === idx
-        )] ?? idx;
-        if (idx < 4) {
-            const statusProgress = {
-                'draft': -1,
-                'menunggu pimpinan unit': 0,
-                'menunggu wr bpku': 1,
-                'menunggu kabiro bpku': 2,
-                'menunggu tim bmn': 3,
-                'review': 4, 'reviewed': 4, 'menunggu kabag umum': 5,
-                'selesai': 6,
-            };
-            const progress = statusProgress[status] ?? -1;
-            if (idx < progress) return 'completed';
-            if (idx === progress) return 'current';
-            return 'upcoming';
-        }
+        if (gi >= 7) return status === 'selesai' ? 'completed' : 'upcoming';
+        const p = { 'draft': -1, 'menunggu pimpinan unit': 1, 'menunggu wr bpku': 2, 'menunggu kabiro bpku': 3, 'menunggu tim bmn': 4, 'review': 4, 'reviewed': 4, 'menunggu kabag umum': 5, 'selesai': 6 }[status] ?? -1;
+        if (gi < p) return 'completed';
+        if (gi === p) return 'current';
         return 'upcoming';
     };
 
-    const getWaitingText = () => {
-        const map = {
-            'menunggu pimpinan unit': 'Sedang menunggu persetujuan Pimpinan Unit Kerja',
-            'menunggu wr bpku': 'Sedang menunggu persetujuan WR BPKU',
-            'menunggu kabiro bpku': 'Sedang menunggu persetujuan Kabiro BPKU',
-            'menunggu tim bmn': 'Sedang menunggu review Tim BMN',
-            'review': 'Sedang direview Tim BMN',
-            'reviewed': 'Sedang menunggu persetujuan Pimpinan Tim BMN',
-            'menunggu kabag umum': 'Sedang menunggu persetujuan Kabag Umum',
-            'selesai': 'Pengajuan telah selesai',
-        };
-        return map[status] || '';
+    const isAct = (ss) => ss === 'completed' || ss === 'current' || ss === 'active';
+    const nCol = (ss) => isAct(ss) ? '#f0ad4e' : '#dee2e6';
+    const lnCol = (a, b) => (isAct(getStatus(a)) && getStatus(b) !== 'upcoming') ? '#f0ad4e' : '#dee2e6';
+
+    const curveColor = (ri) => {
+        const lastG = ri * NODES_PER_ROW + rows[ri].length - 1;
+        const firstNextG = (ri + 1) * NODES_PER_ROW;
+        return firstNextG < allStages.length ? lnCol(lastG, firstNextG) : '#dee2e6';
     };
 
-    const isNodeActive = (ss) => ss === 'completed' || ss === 'current' || ss === 'active';
-    const nodeColor = (ss) => isNodeActive(ss) ? '#f0ad4e' : '#dee2e6';
-    const lineColor = (fromIdx, toIdx) => {
-        return (isNodeActive(getStageStatus(fromIdx)) && getStageStatus(toIdx) !== 'upcoming') ? '#f0ad4e' : '#dee2e6';
-    };
+    const setRef = (key) => (el) => { if (el) circleRefs.current[key] = el; };
 
-    const renderCircle = (ss) => (
-        <div style={{
-            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-            backgroundColor: nodeColor(ss), border: `3px solid ${nodeColor(ss)}`,
+    const renderCircle = (ss, refKey) => (
+        <div ref={refKey ? setRef(refKey) : null} style={{
+            width: 26, height: 26, borderRadius: '50%', flexShrink: 0, zIndex: 2,
+            backgroundColor: nCol(ss), border: `3px solid ${nCol(ss)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
             {ss === 'completed' && <i className="fas fa-check" style={{ color: '#fff', fontSize: '0.6rem' }}></i>}
@@ -116,123 +75,121 @@ function ProgressTracker({ pengajuan, roleId }) {
         </div>
     );
 
-    const renderNode = (stage, stageIdx, showDate = true) => {
-        const ss = getStageStatus(stageIdx);
-        return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '110px' }}>
-                {showDate && (
-                    <div style={{ fontSize: '0.68rem', color: isNodeActive(ss) ? '#6c757d' : '#ccc', height: 16, textAlign: 'center', marginBottom: 4 }}>
-                        {stage.date ? formatDate(stage.date) : '\u00A0'}
-                    </div>
-                )}
-                {renderCircle(ss)}
-                <div style={{ fontSize: '0.72rem', fontWeight: isNodeActive(ss) ? 600 : 400, color: isNodeActive(ss) ? '#333' : '#adb5bd', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>
-                    {stage.label}
-                </div>
-                {stage.date && !showDate && (
-                    <div style={{ fontSize: '0.68rem', color: '#6c757d', marginTop: 2, textAlign: 'center' }}>
-                        {formatDate(stage.date)}
-                    </div>
-                )}
-                {ss === 'current' && status !== 'selesai' && (
-                    <div style={{ fontSize: '0.58rem', color: '#fd7e14', marginTop: 2, textAlign: 'center', fontStyle: 'italic' }}>
-                        Sedang menunggu persetujuan
-                    </div>
-                )}
-            </div>
-        );
-    };
+    useEffect(() => {
+        const raf = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+            const cR = containerRef.current.getBoundingClientRect();
+            const paths = [];
+            for (let r = 0; r < rows.length - 1; r++) {
+                const side = r % 2 === 0 ? 'right' : 'left';
+                const fromEl = circleRefs.current[`r${r}-${side}`];
+                const toEl = circleRefs.current[`r${r + 1}-${side}`];
+                if (fromEl && toEl) {
+                    const fR = fromEl.getBoundingClientRect();
+                    const tR = toEl.getBoundingClientRect();
+                    const fX = fR.left + 13 - cR.left, fY = fR.top + 13 - cR.top;
+                    const tX = tR.left + 13 - cR.left, tY = tR.top + 13 - cR.top;
+                    const arc = 40;
+                    const cpX = side === 'right' ? Math.max(fX, tX) + arc : Math.min(fX, tX) - arc;
+                    paths.push({ d: `M ${fX} ${fY} C ${cpX} ${fY}, ${cpX} ${tY}, ${tX} ${tY}`, color: curveColor(r) });
+                }
+            }
+            setCurvePaths(paths);
+        });
+        return () => cancelAnimationFrame(raf);
+    }, [status]);
 
-    const firstRow2Idx = 5; // index in stages array
-    const curveCol = lineColor(timBmnIdx, firstRow2Idx);
+    const getWaitingText = () => ({
+        'menunggu pimpinan unit': 'Sedang menunggu persetujuan Pimpinan Unit Kerja',
+        'menunggu wr bpku': 'Sedang menunggu persetujuan WR BPKU',
+        'menunggu kabiro bpku': 'Sedang menunggu persetujuan Kabiro BPKU',
+        'menunggu tim bmn': 'Sedang menunggu review Tim BMN',
+        'review': 'Sedang direview Tim BMN',
+        'reviewed': 'Sedang menunggu persetujuan Ketua Tim Kerja BMN',
+        'menunggu kabag umum': 'Sedang menunggu persetujuan Kabag Umum',
+        'selesai': 'Pengajuan telah selesai',
+    }[status] || '');
 
     return (
         <div className="info-card" style={{ backgroundColor: '#fffbea' }}>
             <div className="info-card-title" style={{ color: '#856404' }}>
                 <i className="fas fa-route"></i> Informasi Posisi Pengajuan
             </div>
-
             <div style={{ padding: '20px 20px 10px', overflowX: 'auto' }}>
-                <div style={{ position: 'relative', minWidth: '700px', paddingRight: '50px' }}>
+                <div ref={containerRef} style={{ position: 'relative', minWidth: '700px' }}>
+                    {rows.map((row, ri) => {
+                        const isLR = ri % 2 === 0;
+                        const display = isLR ? row : [...row].reverse();
+                        const gOff = ri * NODES_PER_ROW;
+                        return (
+                            <div key={ri} style={{ display: 'flex', alignItems: 'center', padding: ri === 0 ? '24px 55px 55px' : '20px 55px 55px', marginTop: ri > 0 ? '10px' : 0 }}>
+                                {display.map((stage, di) => {
+                                    const gi = isLR ? gOff + di : gOff + (row.length - 1 - di);
+                                    const ss = getStatus(gi);
+                                    const isLeft = di === 0;
+                                    const isRight = di === display.length - 1;
+                                    let refKey = null;
+                                    if (isLeft) refKey = `r${ri}-left`;
+                                    if (isRight) refKey = `r${ri}-right`;
+                                    if (isLeft && isRight) refKey = `r${ri}-left`;
 
-                    {/* === ROW 1: 5 nodes (L→R) === */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                        {row1.slice(0, 4).map((stage, i) => {
-                            const ss = getStageStatus(i);
-                            return (
-                                <div key={stage.key} style={{ display: 'flex', alignItems: 'flex-start', flex: '1 1 0' }}>
-                                    {renderNode(stage, i, true)}
-                                    <div style={{ flex: 1, height: 3, marginTop: 33, backgroundColor: lineColor(i, i + 1), borderRadius: 2, minWidth: 12 }}></div>
-                                </div>
-                            );
-                        })}
-                        {/* Tim BMN (last node) */}
-                        <div style={{ flex: '0 0 auto' }}>
-                            {renderNode(stages[timBmnIdx], timBmnIdx, true)}
-                        </div>
-                    </div>
+                                    const showLine = di < display.length - 1;
+                                    let lineColor = '#dee2e6';
+                                    if (showLine) {
+                                        const ngi = isLR ? gOff + di + 1 : gOff + (row.length - 1 - (di + 1));
+                                        lineColor = isLR ? lnCol(gi, ngi) : lnCol(ngi, gi);
+                                    }
 
-                    {/* === ROW 2: mirrors same flex structure for perfect alignment === */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '55px' }}>
-                        {isBmnRole ? (
-                            <>
-                                {/* 3 invisible spacers matching first 3 flex items of row 1 */}
-                                <div style={{ flex: '1 1 0' }} />
-                                <div style={{ flex: '1 1 0' }} />
-                                <div style={{ flex: '1 1 0' }} />
-                                {/* Kabag Umum + line (matches 4th flex item position = Kabiro BPKU) */}
-                                <div style={{ display: 'flex', alignItems: 'flex-start', flex: '1 1 0' }}>
-                                    {renderNode(stages[kabagIdx], kabagIdx, false)}
-                                    <div style={{ flex: 1, height: 3, marginTop: 13, backgroundColor: lineColor(pimpinanBmnIdx, kabagIdx), borderRadius: 2, minWidth: 12 }}></div>
-                                </div>
-                                {/* Pimpinan BMN (matches Tim BMN position) */}
-                                <div style={{ flex: '0 0 auto' }}>
-                                    {renderNode(stages[pimpinanBmnIdx], pimpinanBmnIdx, false)}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                {/* 4 invisible spacers matching first 4 flex items of row 1 */}
-                                <div style={{ flex: '1 1 0' }} />
-                                <div style={{ flex: '1 1 0' }} />
-                                <div style={{ flex: '1 1 0' }} />
-                                <div style={{ flex: '1 1 0' }} />
-                                {/* Kabag Umum (matches Tim BMN position) */}
-                                <div style={{ flex: '0 0 auto' }}>
-                                    {renderNode(stages[kabagIdx], kabagIdx, false)}
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                    const isEdgeNode = (gi + 1) % NODES_PER_ROW === 0;
+                                    const labelAbove = isEdgeNode;
 
-                    {/* === SVG Curve (absolute): connects Tim BMN → rightmost row2 node === */}
-                    <svg
-                        style={{
-                            position: 'absolute',
-                            top: '31px', // Exact center of row 1 circles
-                            right: '50px', // Exact alignment with the 110px flex column
-                            pointerEvents: 'none',
-                            overflow: 'visible',
-                        }}
-                        width="110"
-                        height="115"
-                        viewBox="0 0 110 115"
-                        fill="none"
-                    >
-                        <path
-                            d="M 110 0 C 170 0, 170 105, 110 105"
-                            stroke={curveCol}
-                            strokeWidth="3"
-                            fill="none"
-                            strokeLinecap="round"
-                        />
-                    </svg>
-
+                                    return (
+                                        <div key={di} style={{ display: 'contents' }}>
+                                            <div style={{ position: 'relative', flexShrink: 0 }}>
+                                                {ri === 0 && !labelAbove && (
+                                                    <div style={{ position: 'absolute', bottom: ss === 'current' ? 'calc(100% + 35px)' : 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)', fontSize: '0.68rem', color: isAct(ss) ? '#6c757d' : '#ccc', whiteSpace: 'nowrap' }}>
+                                                        {stage.date ? formatDate(stage.date) : '\u00A0'}
+                                                    </div>
+                                                )}
+                                                {labelAbove && (
+                                                    <>
+                                                        <div style={{ position: 'absolute', bottom: ss === 'current' ? 'calc(100% + 37px)' : 'calc(100% + 20px)', left: '50%', transform: 'translateX(-50%)', fontSize: '0.68rem', color: isAct(ss) ? '#6c757d' : '#ccc', whiteSpace: 'nowrap' }}>
+                                                            {stage.date ? formatDate(stage.date) : '\u00A0'}
+                                                        </div>
+                                                        <div style={{ position: 'absolute', bottom: 'calc(100% + 5px)', left: '50%', transform: 'translateX(-50%)', fontSize: '0.72rem', fontWeight: isAct(ss) ? 600 : 400, color: isAct(ss) ? '#333' : '#adb5bd', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                                                            {stage.label}
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {renderCircle(ss, refKey)}
+                                                {!labelAbove && (
+                                                    <div style={{ position: 'absolute', top: 'calc(100% + 5px)', left: '50%', transform: 'translateX(-50%)', fontSize: '0.72rem', fontWeight: isAct(ss) ? 600 : 400, color: isAct(ss) ? '#333' : '#adb5bd', textAlign: 'center', lineHeight: 1.2, width: ri === 0 ? 'auto' : 120, whiteSpace: ri === 0 ? 'nowrap' : 'normal' }}>
+                                                        {stage.label}
+                                                    </div>
+                                                )}
+                                                {ss === 'current' && status !== 'selesai' && (
+                                                    <div style={{ position: 'absolute', bottom: 'calc(100% + 22px)', left: '50%', transform: 'translateX(-50%)', fontSize: '0.58rem', color: '#fd7e14', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+                                                        Sedang menunggu persetujuan
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {showLine && <div style={{ flex: 1, height: 3, backgroundColor: lineColor, borderRadius: 2, minWidth: 20 }}></div>}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
+                    {curvePaths.length > 0 && (
+                        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+                            {curvePaths.map((cp, i) => (
+                                <path key={i} d={cp.d} stroke={cp.color} strokeWidth="3" fill="none" strokeLinecap="round" />
+                            ))}
+                        </svg>
+                    )}
                 </div>
-
-                {/* Waiting text */}
                 {getWaitingText() && (
-                    <div style={{ textAlign: 'center', marginTop: 16, fontSize: '0.82rem', color: '#856404', fontWeight: 500 }}>
+                    <div style={{ textAlign: 'center', marginTop: 10, fontSize: '0.82rem', color: '#856404', fontWeight: 500 }}>
                         <i className="fas fa-clock me-1"></i>
                         {getWaitingText()}
                     </div>
